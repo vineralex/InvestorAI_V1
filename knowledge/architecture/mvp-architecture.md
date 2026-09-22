@@ -1,186 +1,156 @@
 ---
 type: concept
 title: MVP Architecture
-description: Approved first-pass architecture and first vertical slice for Investor AI V1.
-tags: [architecture, mvp, saas, multitenancy, microservices]
-updated_at: 2026-09-21
+description: Service boundaries, analysis flows, delivery, and implementation slices for the Investor AI product MVP.
+tags: [architecture, mvp, multitenancy, portfolio, analysis, scheduling, email]
+updated_at: 2026-09-22
 status: approved
 ---
 
 # MVP architecture
 
-This document records the decisions approved during the first architecture
-pass. It defines boundaries and invariants, not detailed service designs.
+This architecture implements the [MVP product definition](../product/mvp-product-definition.md).
+It records system boundaries and execution flow, not service contracts. The
+previously approved portfolio-retrieval slice remains the first implementation
+milestone; the product MVP also requires two independent analyses, scheduled
+execution, persistent results, and email delivery.
 
-## Product boundary
+## Decisions
 
-Investor AI V1 is a multitenant SaaS for portfolio management. A tenant is a
-company. For V1 a user has one active tenant membership, while the data model
-keeps identity and membership separate so this restriction can change later.
+### Service and data ownership
 
-A tenant can connect multiple broker accounts. Broker connections and accounts
-belong to the tenant, not to an individual user. All active accounts contribute
-to one logical consolidated portfolio; account-level positions remain available
-internally as its source data.
+| Component | Responsibility and owned data |
+| --- | --- |
+| Identity Service | Users, credentials, memberships, roles, activation, and token issuance. |
+| Tenant Service | Tenant lifecycle. The Admin CLI remains its authenticated client. |
+| Portfolio Service | Tenant broker connections and accounts, position snapshots, refresh operations, consolidated portfolio, and application-controlled market facts used for analysis. Alpaca paper remains the first broker adapter. |
+| Analysis Service | Tenant Markdown strategy and maintained watchlist; both analysis operations, their run state and persisted results. It owns the Decision Layer as an internal boundary. |
+| Scheduler Service | Tenant-scoped schedules and due-run initiation for each analysis operation. It does not own analysis results or make investment decisions. It may also initiate the existing portfolio refresh operation. |
+| Email Service | Email composition and delivery state for activation and completed-analysis messages. It sends through SMTP; analysis results remain owned by Analysis Service. |
 
-## First vertical slice
+Services are independently deployable processes. RabbitMQ carries cross-service
+requests and facts. PostgreSQL remains one database and schema with strict
+service ownership: no service reads or writes another service's data directly.
+Tenant-owned data is protected by application authorization and PostgreSQL
+Row-Level Security, as specified in [tenant isolation](multi-tenant-data-isolation.md).
+Docker Compose on one machine remains the initial deployment topology.
 
-The first vertical slice ends after the following flow:
+The approved infrastructure invariants remain in force: a user has one active
+tenant membership in V1; broker connections belong to the tenant, which may
+have multiple accounts contributing to one consolidated portfolio. Identity
+Service uses .NET, ASP.NET Core Identity, and OpenIddict. The first broker
+adapter is provider-neutral inside Portfolio Service; there is no Broker
+Connector Service. Email Service uses SMTP with MailKit. Each service owns its
+migrations and restricted runtime database role, with no shared repositories,
+foreign keys, or cross-service database transactions. Portfolio Service keeps
+broker credentials encrypted, with keys outside the database and repository;
+credentials never enter messages or logs.
 
-1. An operator creates a tenant and its initial owner through an Admin CLI.
-2. The owner receives a one-time activation code by email and sets a password
-   through the API.
-3. The owner signs in and receives a JWT.
-4. The owner connects one or more Alpaca paper accounts.
-5. Positions are imported asynchronously.
-6. An authorized user reads the tenant's consolidated portfolio through the API.
-7. An Owner or Manager can request a manual portfolio refresh.
+The Decision Layer evaluates bounded choices, classifications, scores, or
+rankings for Analysis Service using the tenant strategy and controlled facts.
+It does not own source data, authorize access, send email, or perform financial
+actions. A deterministic implementation is sufficient initially. Explanations
+may use an LLM, but generated prose cannot be the source of financial numbers;
+the selected model and detailed Decision Layer contracts remain open.
 
-The Admin CLI is a thin authenticated client of Tenant Service. It never writes
-directly to the database.
+### Common execution and delivery
 
-## Services
+An authorized API request or a due schedule initiates the same tenant-scoped
+operation in Analysis Service. The service records a run, obtains strategy and
+operation-specific inputs from their owners, evaluates them, and persists the
+outcome before publishing an analysis-completed fact. API callers can observe
+run status and retrieve persisted results. A scheduler run has the same result
+and delivery path as an API run; neither operation invokes the other.
 
-The initial system contains independently deployable services:
+Email Service consumes each completed outcome and sends an email for that run,
+including an explicit "nothing significant found" outcome. Delivery failures
+are retried and remain visible as delivery state; they do not erase or recompute
+the analysis result. Failed analysis runs are recorded and observable, but are
+not completed outcomes. The exact recipient policy and operational handling of
+repeated delivery failure remain open.
 
-- Identity Service;
-- Tenant Service;
-- Portfolio Service;
-- Email Service.
+Cross-service messages retain tenant, operation, message, correlation, and
+causation context. API boundaries validate user JWTs. Async commands use
+narrowly scoped internal JWTs issued by Identity Service; user bearer tokens
+never enter RabbitMQ. Delivery is at least once, so run initiation, result
+publication, and email consumption must be idempotent and use outbox/inbox
+patterns. These rules extend the [approved identity boundary](inbound-identity-and-authorization.md)
+and existing portfolio-refresh choreography.
 
-It also uses RabbitMQ and PostgreSQL. Admin CLI is a client, not a service that
-owns data.
+### Portfolio attention analysis
 
-Identity Service uses .NET, ASP.NET Core Identity, and OpenIddict. It owns users,
-passwords, memberships, roles, activation codes, and token issuance. Tenant
-Service owns tenant lifecycle. Portfolio Service owns broker connections,
-broker accounts, position snapshots, refresh operations, and the consolidated
-portfolio. Email Service initially supports only owner-activation email and
-sends through SMTP using MailKit.
+Analysis Service loads the tenant strategy and consolidated positions from
+Portfolio Service, with current market facts and their freshness. It evaluates
+positions through the Decision Layer, persists attention findings or an explicit
+empty outcome, then publishes completion for email delivery. It may flag a
+position for the user's attention; it never decides to sell or executes a trade.
 
-Alpaca paper is the only broker provider in the first slice. Its adapter stays
-inside Portfolio Service, behind a provider-neutral boundary. There is no
-Broker Connector Service or realtime broker listener in the MVP.
+Portfolio refresh remains a separate tenant-level operation. It covers all
+active accounts, joins concurrent requests, and can partially succeed while
+retaining the last successful snapshot for unavailable accounts and marking it
+stale. The refresh API accepts work asynchronously and exposes an operation
+identifier for completion tracking. An analysis uses only facts whose freshness
+is known and makes incomplete coverage explicit in its result. If usable facts are
+insufficient, it records a failed run rather than a misleading completed result.
+Refresh and analysis cadence, and the threshold for sufficient facts, are open.
 
-## Choreography
+### Watchlist opportunity search
 
-Cross-service workflows use RabbitMQ and choreography. Services publish facts
-or requests and react independently; there is no central component that calls
-every step of a workflow.
+Analysis Service loads the tenant strategy and user-maintained watchlist, then
+obtains controlled market facts for those candidates from Portfolio Service.
+The Decision Layer ranks eligible candidates. Analysis Service persists several
+ranked candidates or an explicit empty outcome and publishes completion for
+email delivery. This operation does not require a preceding portfolio-attention
+run, scan the whole market, compare positions with replacements, or choose an
+asset to buy for the user. Missing or stale candidate facts are disclosed; the
+minimum usable coverage remains open.
 
-RabbitMQ is transport, not an identity authority. Commands carry a narrowly
-scoped internal JWT issued by Identity Service. The receiving service validates
-its signature, issuer, audience, scope, tenant, lifetime, message identity, and
-binding to the command. A user's bearer token is validated at the HTTP boundary
-and is never placed on the message bus.
+### Human control and access
 
-Delivery is at least once. Consumers and state changes must therefore be
-idempotent. Services use transactional outbox/inbox patterns and retain message,
-correlation, and causation identifiers. Exact message schemas are deferred to
-service design.
+Investor AI provides decision support only. It does not place, modify, or
+cancel orders, change holdings, or make the user's final investment decision.
+Owner and Manager may request refresh and analysis and read analysis results.
+Viewer may read the portfolio but has no strategy or analysis actions. Owner
+manages broker connections, tenant users, and tenant lifecycle. A tenant always
+has an active Owner. Each service enforces tenant and resource authorization
+independently.
 
-## Portfolio refresh
+Investor AI V1 is a new system, not a structural migration of the old one.
+Existing domain rules, broker code, and tests require review before reuse; the
+old database schema, Worker boundaries, and Quartz setup are not adopted.
+The existing email implementation may be adapted to Email Service.
 
-Portfolio Service does not care what triggered a refresh. A user, a future
-scheduler, or another authorized component can request the same tenant-level
-operation. The public operation refreshes all active accounts for the tenant;
-refreshing a single account is an internal technical operation.
+## Implementation slices
 
-Only one refresh may run for a tenant at a time. Concurrent requests join the
-active operation instead of starting competing imports.
+1. **Portfolio foundation.** Provision tenant and owner, activate with a
+   one-time email code and password setup through the API, sign in, connect
+   Alpaca paper accounts, import positions asynchronously,
+   expose the consolidated portfolio, and support manual tenant refresh. This
+   is the previously approved first slice, not the complete product MVP.
+2. **Portfolio attention end to end.** Add Markdown strategy, controlled market
+   facts, Analysis Service with its initial Decision Layer, persisted runs and
+   results, API initiation and retrieval, scheduled initiation, and email for
+   every completed attention analysis, including empty outcomes.
+3. **Opportunities end to end.** Add tenant watchlist and candidate facts; use
+   the same initiation, result, Decision Layer, scheduling, and email boundaries
+   for independent watchlist ranking.
+4. **MVP verification.** Demonstrate both API and scheduled paths end to end,
+   tenant isolation, idempotent retries, data-freshness disclosure, result
+   retrieval, and email delivery with observable failure states.
 
-Refresh is allowed to succeed partially. Successfully read accounts receive new
-snapshots. An unavailable account retains its last successful snapshot and is
-marked stale. The consolidated portfolio exposes whether it is ready, degraded,
-or failed and never presents stale data as fresh.
+## Open questions
 
-The API accepts a refresh asynchronously and exposes a refresh-operation
-identifier so callers can observe completion. Exact endpoints and state names
-are deferred to Portfolio Service design.
+- Strategy interpretation, portfolio-risk signals, thresholds, opportunity
+  criteria, and ranking semantics.
+- Market-data provider and refresh/freshness policy, including minimum usable
+  coverage for a completed analysis.
+- Schedule cadence and tenant configuration for each operation and refresh.
+- Detailed Decision Layer contracts, result shapes, and any future Jev or
+  equivalent integration.
+- Email recipients and escalation after persistent delivery failure.
 
-There is no scheduled or realtime synchronization in the first slice. A future
-Scheduler Service may publish the same refresh request without changing
-Portfolio Service. Whether that service internally uses Quartz is deliberately
-deferred.
-
-## Authorization
-
-Authorization combines tenant membership with three roles:
-
-| Capability | Owner | Manager | Viewer |
-| --- | --- | --- | --- |
-| View the portfolio | Yes | Yes | Yes |
-| Request a portfolio refresh | Yes | Yes | No |
-| Manage broker connections | Yes | No | No |
-| Manage tenant users and roles | Yes | No | No |
-| Manage the tenant | Yes | No | No |
-| Future strategy and analysis actions | Yes | Yes | No |
-
-A tenant must always have at least one active Owner. Its final Owner cannot be
-removed, deactivated, or demoted.
-
-## Data architecture and isolation
-
-The MVP uses one PostgreSQL database and one schema. Service ownership is still
-strict:
-
-- each table has one owning service;
-- a service never queries, joins, or writes another service's tables;
-- services do not share repositories, foreign keys, or database transactions;
-- each service owns its migrations and migration journal;
-- separate runtime database roles receive access only to their service's tables.
-
-Tenant-owned tables include `tenant_id`. Tenant isolation is enforced both by
-application authorization and PostgreSQL Row-Level Security. Migration roles
-own tables and policies; runtime roles cannot bypass RLS. Tenant context is set
-transaction-locally for database work. Cross-tenant isolation requires
-integration tests.
-
-This logical ownership is required so a service can move to its own database in
-the future, but database-per-service is not part of the MVP.
-
-## Broker credentials
-
-Portfolio Service stores broker credentials encrypted for the MVP. Encryption
-keys live outside the database and repository. Plaintext credentials exist only
-while needed in memory and must never appear in messages or logs. A separate
-credential service is deferred.
-
-## Deployment
-
-Each service runs as a separate process and container. Local and initial MVP
-deployment uses Docker Compose on one machine with RabbitMQ and PostgreSQL.
-Kubernetes, high availability, and distributed production topology are outside
-this architecture pass.
-
-## Migration from Investor AI
-
-Investor AI V1 is a new system, not a structural migration of the old
-application.
-
-- Existing domain logic is not copied as-is; each rule must be reviewed and
-  adapted before use.
-- The existing database schema is not a foundation for the V1 schema.
-- The old Worker, service boundaries, and Quartz setup are not migrated.
-- Existing Alpaca code is reference material only until reviewed.
-- Existing tests are not automatically authoritative because they may encode
-  the old model.
-- The email implementation is the only current reuse candidate, and it must be
-  adapted to the independent Email Service and activation-only scope.
-
-## Explicitly deferred
-
-The first vertical slice excludes:
-
-- AI, agents, memory, and briefings;
-- investment strategy and recommendations;
-- Scheduler Service and automatic runs;
-- Web UI;
-- invitations for additional users;
-- billing and subscriptions;
-- broker providers other than Alpaca;
-- live trading and autonomous order execution;
-- realtime broker synchronization;
-- database-per-service;
-- Kubernetes and production high availability.
-
+These questions do not alter the approved product boundary. The MVP excludes
+automatic trading, a Web UI, whole-market scanning, pairwise replacement
+comparison, mandatory specialized ML, billing, realtime broker synchronization,
+database-per-service, and Kubernetes. Agent Runtime, Agent Gateway, and Memory
+Service remain [architectural intentions](intentions.md), not MVP dependencies.

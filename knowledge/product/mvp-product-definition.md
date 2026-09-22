@@ -180,17 +180,11 @@ opportunity search, scheduling, API, and email paths must actually run.
 
 ## Relationship to the approved architecture
 
-The earlier [MVP architecture](../architecture/mvp-architecture.md) defines a
-first infrastructure vertical slice ending at consolidated portfolio retrieval
-and manual refresh. It explicitly defers AI, strategy analysis, scheduling, and
-briefings.
-
-This product definition establishes a broader product MVP. The earlier slice
-remains a valid implementation milestone, but it is not by itself sufficient to
-claim the Investor AI product MVP. Before implementation planning, the
-architecture must be reconciled with the product requirements in this document,
-especially the Decision Layer, scheduled analyses, opportunity search, and email
-delivery.
+The [MVP architecture](../architecture/mvp-architecture.md) retains the earlier
+portfolio-retrieval slice as its first implementation milestone and extends the
+system to both independent analyses, a Decision Layer, scheduled execution,
+persistent results, and email delivery. The first slice alone is not sufficient
+to claim the Investor AI product MVP.
 
 ## Deferred decisions
 
