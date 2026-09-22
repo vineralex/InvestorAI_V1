@@ -3,7 +3,7 @@ type: concept
 title: Architectural Intentions
 description: Unresolved direction for evolving Investor AI into a multitenant agentic SaaS.
 tags: [architecture, saas, multitenancy, microservices]
-updated_at: 2026-09-21
+updated_at: 2026-09-23
 status: intention
 ---
 
@@ -29,3 +29,4 @@ The intended supporting concerns are documented separately:
 - [Execution observability](execution-observability.md)
 - [SaaS Control Plane](saas-control-plane.md)
 - [Outbound identity and authorization](outbound-identity-and-authorization.md)
+- [Laya and Jev Decision Layer cascade](decision-layer-laya-jev-cascade-intention.md)

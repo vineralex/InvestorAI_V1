@@ -31,3 +31,4 @@ architecture.
 - Logs, metrics, and traces: [execution observability](architecture/execution-observability.md)
 - Tenant onboarding and lifecycle: [SaaS Control Plane](architecture/saas-control-plane.md)
 - External credentials and delegated actions: [outbound identity and authorization](architecture/outbound-identity-and-authorization.md)
+- Future typed-decision routing: [Laya and Jev Decision Layer cascade](architecture/decision-layer-laya-jev-cascade-intention.md)
