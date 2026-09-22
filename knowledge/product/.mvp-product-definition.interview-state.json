@@ -1,0 +1,69 @@
+{
+  "spec": "mvp-product-definition.md",
+  "timestamp": "2026-09-22",
+  "previewGenerated": false,
+  "feedbackRounds": [],
+  "coverage": {
+    "userGoal": "done",
+    "personalValue": "done",
+    "productOperations": "done",
+    "tenantStrategy": "done-for-mvp",
+    "candidateSource": "done-for-mvp",
+    "decisionModels": "done-at-product-level",
+    "apiAndScheduler": "done",
+    "emailDelivery": "done",
+    "safetyBoundary": "done",
+    "successCriterion": "done",
+    "mvpBoundary": "done"
+  },
+  "decisions": [
+    "The product MVP requires strategy-aware analysis, not only portfolio aggregation.",
+    "Portfolio attention analysis and opportunity search are independent operations.",
+    "Opportunity candidates come from a tenant-maintained watchlist for the MVP.",
+    "Tenant strategy is represented as Markdown for the MVP.",
+    "Both operations can be invoked through API and scheduler.",
+    "Every completed analysis sends an email, including runs with no significant result.",
+    "Decision Models are part of the MVP product direction; detailed architecture and Jev implementation are deferred.",
+    "Deterministic rules are an acceptable first Decision Layer implementation.",
+    "No automated financial actions are permitted.",
+    "The project is evaluated for personal utility, learning, and public engineering credibility, not commercial validation."
+  ],
+  "openQuestions": [
+    "Exact risk rules and thresholds",
+    "Exact opportunity-ranking rules",
+    "Scheduling cadence",
+    "Detailed Decision Layer architecture",
+    "Future decision-model providers"
+  ],
+  "codebaseAnalysisSummary": "InvestorAI_V1 currently contains approved architecture knowledge but no application implementation. Its first vertical slice covers tenant onboarding, Alpaca paper connections, asynchronous position import, consolidated portfolio retrieval, and manual refresh while explicitly deferring AI, strategy analysis, scheduling, and briefings. Legacy documentation was used only as reference and its code was not read. It indicates portfolio import, market data, strategy state, deterministic analysis, and a planned email briefing direction.",
+  "qa": [
+    {
+      "topic": "user problem",
+      "answer": "An Intel position fell before the user acted; timely detection could have reduced the loss."
+    },
+    {
+      "topic": "required product operations",
+      "answer": "Detect portfolio positions requiring attention and independently find several candidate opportunities."
+    },
+    {
+      "topic": "strategy",
+      "answer": "Each tenant has its own portfolio-management rules, currently stored in Markdown."
+    },
+    {
+      "topic": "candidate universe",
+      "answer": "Use a watchlist selected by the user for the MVP."
+    },
+    {
+      "topic": "delivery",
+      "answer": "Both operations run through API or scheduler; every run sends email."
+    },
+    {
+      "topic": "decision models",
+      "answer": "Decision Layer is required in MVP direction, preferably compatible with Jev later; deterministic rules and hard-assigned implementations are acceptable initially."
+    },
+    {
+      "topic": "project objective",
+      "answer": "Personal portfolio utility, expanding the programming stack, and presenting a serious side project publicly and in a resume."
+    }
+  ]
+}
