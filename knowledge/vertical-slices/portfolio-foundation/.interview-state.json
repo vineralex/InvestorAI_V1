@@ -1,0 +1,641 @@
+{
+  "skill": "interview-me",
+  "stateSchemaVersion": 2,
+  "specName": "portfolio-foundation",
+  "timestamp": "2026-09-23T00:00:00+03:00",
+  "lastUpdatedAt": "2026-09-23T00:00:00+03:00",
+  "status": "spec-generated-awaiting-review",
+  "transcriptMode": "edited-for-context-not-verbatim",
+  "transcriptNote": "Questions, answers, objections, and clarifications are rewritten for clarity while preserving chronology, reasoning, disagreement, and resolution. Tool output and non-substantive coordination messages are omitted.",
+  "semanticVerification": {
+    "sourceOfTruth": "The user-assistant dialogue in this task, not the generated specification files.",
+    "method": "Manual chronological comparison of every substantive interview branch, including user corrections, rejected assistant assumptions, superseded proposals, accepted decisions, deferred work, and the later discussion about the quality of this state file.",
+    "status": "verified-against-dialogue",
+    "verifiedAt": "2026-09-23T00:00:00+03:00",
+    "coverage": [
+      "research baseline and approved-versus-intention distinction",
+      "tenant provisioning, Owner activation, authentication, roles, and permissions",
+      "broker connection/account/adapter modelling and the legacy-repository detour",
+      "initial import, refresh concurrency, RabbitMQ timing, multiple service instances, freshness, and degradation",
+      "credential and activation-secret encryption, key management, audit, observability, and DLQ",
+      "disconnect simplification, Manager/Viewer boundary, local-dev deployment, and rate-limiting deferral",
+      "portfolio views, instrument identity, currency boundary, and readiness outcome",
+      "Laya/Jev intention, split specification structure, Mermaid diagrams, and state-file correction"
+    ],
+    "dialogueCorrectionsPreserved": [
+      "The first technical provisioning question was too abstract and was restated in user-facing terms.",
+      "Operational numeric policy values are configuration, but this was not generalized to every possible value.",
+      "The JWT design is a selected policy and is not labelled a compromise.",
+      "Permissions are distinct from roles; roles are fixed permission bundles.",
+      "Connection-to-account cardinality and paper/live representation are broker-specific, not universal architecture.",
+      "The legacy InvestorAi inspection did not decide the V1 connection design.",
+      "Account participation is a boolean, not an additional lifecycle.",
+      "The user rejected a mandatory manual-refresh idempotency key in favor of server-side active/recent operation reuse.",
+      "Pending refresh state is committed before RabbitMQ delivery and coordinated through PostgreSQL across instances.",
+      "A refresh owns a list of stable errors rather than one error code.",
+      "Accepted topics must not be repeatedly reopened without a new contradiction.",
+      "A static host-mounted root key was rejected in favor of envelope encryption and an external deployed key manager.",
+      "Audit tables remain service-owned despite one common audit envelope/library.",
+      "Reversible disable/reconnect was removed from the first slice in favor of terminal disconnect and a new connection.",
+      "Rate limiting is deferred from the first slice, required for MVP, and is not framed as current public-exposure risk because the system is local dev only.",
+      "Readiness means the user sees real portfolio positions; activation alone is insufficient.",
+      "Both account and consolidated portfolio views are mandatory.",
+      "Currency is displayed per position with no totals, base currency, or FX.",
+      "Laya and Jev are documented only in a separate intention, outside Portfolio Foundation."
+    ]
+  },
+  "previewGenerated": false,
+  "feedbackRounds": [],
+  "coverageMap": {
+    "scopeAndOutcomes": "done",
+    "provisioningAndActivation": "done",
+    "authenticationAuthorization": "done",
+    "brokerConnections": "done",
+    "portfolioRefreshAndReads": "done",
+    "messagingTransactionsRecovery": "done",
+    "securityAuditObservability": "done",
+    "implementationAndReadiness": "done"
+  },
+  "inputs": [
+    "knowledge/index.md",
+    "knowledge/architecture/mvp-architecture.md",
+    "knowledge/product/mvp-product-definition.md",
+    "knowledge/architecture/inbound-identity-and-authorization.md",
+    "knowledge/architecture/multi-tenant-data-isolation.md",
+    "knowledge/architecture/saas-control-plane.md",
+    "User requirement for the Portfolio Foundation vertical slice"
+  ],
+  "codebaseAnalysisSummary": {
+    "currentRepository": "Knowledge-only V1 repository; no service implementation or current contracts were present.",
+    "approvedBaseline": "The first slice, service ownership, JWT/RBAC+ABAC boundary, tenant isolation, RabbitMQ at-least-once delivery, outbox/inbox, partial refresh, and credential protection were already approved at architecture level.",
+    "intentionHandling": "Documents with status intention were not treated as decisions.",
+    "legacyRepositoryReview": "D:/Projects/InvestorAi was inspected read-only. Its single configured Alpaca provider and atomic position replacement are reference material only; its one-account, non-multitenant worker architecture was not adopted.",
+    "implementationChanges": "None. Only knowledge/specification files were created or updated."
+  },
+  "interviewLog": [
+    {
+      "sequence": 1,
+      "area": "Research baseline",
+      "assistant": "Before the interview, proposed reading the interview skill, knowledge/index.md, MVP architecture, and only relevant approved documents. Intention documents would not be treated as decisions, and implementation would not begin.",
+      "user": "Requested the interview on the basis of the approved knowledge bundle and explicitly prohibited implementation, product-scope expansion, premature low-level contracts, and treating intentions as decisions.",
+      "context": "The repository contained knowledge documents but no V1 service implementation. Approved documents already fixed service ownership, tenant isolation, JWT validation, RabbitMQ at-least-once delivery, outbox/inbox, partial refresh, and encrypted broker credentials.",
+      "resolution": "Use approved knowledge as the normative baseline; keep intention material separate; inspect only minimal legacy code as non-normative reference."
+    },
+    {
+      "sequence": 2,
+      "area": "Provisioning acceptance",
+      "assistant": "Initially asked in distributed-systems terms when the Admin CLI should consider tenant plus initial Owner creation successful. After the wording confused the user, restated it concretely: return an operation identifier after creating the tenant, then show tenant created, Owner created, and email sent as observable stages. A failed email must not delete the tenant or Owner.",
+      "user": "Accepted the simplified asynchronous model.",
+      "context": "Tenant, Identity, and Email own separate data and cannot share one transaction. Waiting for SMTP would falsely couple tenant creation to email delivery.",
+      "resolution": "Tenant Service returns an observable provisioning operation after its local commit; later Owner and email milestones are asynchronous."
+    },
+    {
+      "sequence": 3,
+      "area": "Tenant and provisioning lifecycle",
+      "assistant": "Proposed tenant states Provisioning, AwaitingOwnerActivation, and Active. Proposed that failure to establish the initial Owner belongs to the provisioning operation, while the tenant remains recoverable. Clarified that the invariant requiring an active Owner begins only once the tenant is Active.",
+      "user": "Accepted the lifecycle.",
+      "context": "This resolves the apparent contradiction between an onboarding tenant with only a pending Owner and the approved rule that an active tenant always has an active Owner.",
+      "resolution": "Tenant lifecycle and provisioning-operation lifecycle are separate and explicitly observable."
+    },
+    {
+      "sequence": 4,
+      "area": "Activation challenge policy",
+      "assistant": "Proposed a single-use activation code, hash-only storage, invalidation of the prior code on resend, limited attempts, atomic password setup plus activation, safe repeated-use response, and no secret in logs or delivery history. Initially used concrete values such as 24 hours.",
+      "user": "Accepted the policy but corrected that code lifetime and attempt limit must be configuration rather than hardcoded values. Added a broader preference that values of this operational-policy type should normally be configurable.",
+      "context": "The user did not request that every value in the system be configurable; the principle applies to lifetimes, limits, timeouts, retries, thresholds, retention, and similar operational policy values.",
+      "resolution": "Activation semantics are fixed, while expiry and attempt limits are validated configuration with safe defaults."
+    },
+    {
+      "sequence": 5,
+      "area": "JWT policy",
+      "assistant": "Proposed short-lived configurable access JWTs, longer-lived rotated and revocable refresh tokens, and local validation by APIs. Role or tenant changes stop new token issuance and refresh, but an already issued access token remains valid until its short expiry. Called this a compromise.",
+      "user": "Accepted the model and corrected the terminology: this is the selected policy, not necessarily a compromise. Reiterated that access-token lifetime is another good configuration example.",
+      "context": "Immediate distributed revocation would require additional shared state or synchronous checks that conflict with the approved local JWT-validation boundary.",
+      "resolution": "Adopt the token policy and describe it neutrally as a policy choice."
+    },
+    {
+      "sequence": 6,
+      "area": "Roles, permissions, and capabilities",
+      "assistant": "Proposed Owner-only connection management; Owner and Manager manual refresh; Owner, Manager, and Viewer portfolio/freshness/status reads; protected operator-only provisioning; and activation restricted to the valid code recipient.",
+      "user": "Accepted the capability matrix but required permissions and roles to be separate from the start.",
+      "context": "Direct role checks would hard-wire business authorization and make later role evolution difficult.",
+      "resolution": "Permissions are the authorization primitives. Owner, Manager, and Viewer are fixed permission bundles. The slice has no custom roles, direct per-user grants, or per-user denies."
+    },
+    {
+      "sequence": 7,
+      "area": "Connection and account model",
+      "assistant": "Initially suggested that one broker connection might expose one or several broker accounts and that all active accounts could contribute to a consolidated portfolio.",
+      "user": "Challenged the inference and supplied a counterexample: a connection might expose multiple accounts, but only an explicitly selected paper account should participate. Also noted that for Alpaca, paper and live accounts may each have a separate connection.",
+      "context": "The discussion separated technical accessibility from portfolio membership and exposed that provider-specific cardinality must not become a universal domain invariant.",
+      "resolution": "Broker connection and broker account are separate concepts; cardinality is adapter-specific; accessible accounts enter the portfolio only through explicit Owner selection."
+    },
+    {
+      "sequence": 8,
+      "area": "Provider-specific paper/live representation",
+      "assistant": "Suggested recording paper/live on each account, then suggested that Alpaca might define it at connection level and reject live connections in the first slice.",
+      "user": "Rejected those statements as implementation notes rather than durable architecture and observed that paper/live representation may differ from broker to broker.",
+      "context": "The approved scope still says Alpaca paper is the first adapter, but it does not establish a universal location for environment metadata or an exact rejection mechanism.",
+      "resolution": "Do not promote an Alpaca assumption into the general architecture. Keep broker-specific environment mapping as an open adapter-contract detail."
+    },
+    {
+      "sequence": 9,
+      "area": "Broker adapter boundary",
+      "assistant": "Defined the adapter as an internal Portfolio Service component responsible for provider access validation, accessible-account discovery, position retrieval, provider DTO normalization, and provider-error translation. Explicitly excluded persistence, user authorization, account selection, refresh state, consolidation, and message publication.",
+      "user": "Accepted the boundary.",
+      "context": "This preserves the approved provider-neutral boundary without creating a Broker Connector Service.",
+      "resolution": "Adapter responsibilities are narrow and provider-specific; Portfolio Service retains all domain ownership."
+    },
+    {
+      "sequence": 10,
+      "area": "Legacy InvestorAi repository check",
+      "assistant": "When discussing asynchronous connection validation, interpreted the request to inspect D:/Projects/InvestorAi too broadly and reported on the legacy single-account adapter, scheduled import, and atomic position replacement.",
+      "user": "Clarified that the inspection was meant only to inform the pending validation question and explicitly accepted asynchronous validation.",
+      "context": "The legacy project has a useful DTO-normalizing adapter and account-level atomic replacement but no tenant-owned connections, dynamic account selection, operation API, RabbitMQ choreography, or multi-account partial refresh.",
+      "resolution": "Legacy code is reference material only. Connection validation in V1 remains an asynchronous observable operation."
+    },
+    {
+      "sequence": 11,
+      "area": "Connection validation lifecycle",
+      "assistant": "Proposed PendingValidation, Ready, ActionRequired for rejected credentials, TemporarilyUnavailable for retryable dependency failures, and initially Disabled for Owner shutdown. Updating credentials would return the connection to PendingValidation.",
+      "user": "Accepted the validation lifecycle at that point.",
+      "context": "The lifecycle distinguishes failures needing Owner action from failures that may recover without changing credentials.",
+      "resolution": "Keep the four validation states. The shutdown portion was later simplified to terminal disconnect and supersedes the initial Disabled proposal."
+    },
+    {
+      "sequence": 12,
+      "area": "Stable errors and friendly messages",
+      "assistant": "Proposed separating stable machine-readable codes, safe parameters, user-facing text, and protected diagnostics. Suggested service-owned catalogues under one common error envelope rather than a central Error Dictionary Service.",
+      "user": "Accepted and emphasized that every service must have this mechanism even if full localization or an editable repository is deferred beyond the slice or MVP.",
+      "context": "Long-running operations should store stable codes and parameters rather than frozen localized strings or raw provider exceptions.",
+      "resolution": "Service-local message catalogues are required platform preparation; central error service is rejected."
+    },
+    {
+      "sequence": 13,
+      "area": "Account inclusion and data status",
+      "assistant": "Initially proposed separate Included and Excluded lifecycle states plus NotImported, Refreshing, Fresh, Stale, and Unavailable data states.",
+      "user": "Rejected the inclusion lifecycle as unnecessary complexity and requested a simple included true/false flag. Accepted the separate portfolio-data states.",
+      "context": "Participation is a current Owner selection, while data quality is an operational condition and must not be conflated with selection.",
+      "resolution": "Use a boolean inclusion flag; retain independent data freshness/availability state."
+    },
+    {
+      "sequence": 14,
+      "area": "Automatic initial import",
+      "assistant": "Proposed automatically starting an asynchronous first import when included changes from false to true, returning an operation identifier rather than requiring a separate manual refresh.",
+      "user": "Accepted.",
+      "context": "This completes the connection-to-visible-portfolio path without a redundant user action.",
+      "resolution": "Inclusion triggers initial import automatically."
+    },
+    {
+      "sequence": 15,
+      "area": "Refresh target set",
+      "assistant": "Proposed freezing the set of included accounts when tenant refresh is accepted. Accounts included later receive their own initial import; accounts excluded while work is running no longer participate in current portfolio reads even if already-started work finishes.",
+      "user": "Accepted.",
+      "context": "A fixed target set gives the operation a deterministic coverage denominator despite concurrent selection changes.",
+      "resolution": "Refresh outcome is evaluated against the account set captured at acceptance."
+    },
+    {
+      "sequence": 16,
+      "area": "Concurrent tenant refresh",
+      "assistant": "Proposed at most one unfinished refresh per tenant. The first caller creates it; later concurrent callers receive the same operation identifier rather than creating a queue. Every request is still audited.",
+      "user": "Accepted.",
+      "context": "This is an approved join policy, not accidental suppression of work.",
+      "resolution": "Concurrent tenant refresh requests join one shared operation."
+    },
+    {
+      "sequence": 17,
+      "area": "Idempotency terminology and repeat calls",
+      "assistant": "Introduced a client idempotency key and inbox messageId in technical terms. Proposed that without a key a call after completed refresh would create new work.",
+      "user": "Objected that the explanation was unclear and questioned why calls arriving within a second or configurable interval should be treated as new.",
+      "context": "The user wanted server-side behavior that handles accidental double calls without requiring API consumers to understand a special token.",
+      "resolution": "Do not require a client idempotency key for manual refresh. Use active-operation reuse plus a configurable recent-terminal-operation reuse interval. Keep messageId/inbox as an internal delivery-deduplication mechanism."
+    },
+    {
+      "sequence": 18,
+      "area": "Durable Pending state before RabbitMQ",
+      "assistant": "Initially described repeat calls as joining a running operation. The user pointed out that the API cannot know whether RabbitMQ has delivered the work or whether processing has begun.",
+      "user": "Required an explanation of how operation existence is known before delivery.",
+      "context": "If the message were published first and operation state created only by a consumer, HTTP callers could observe ambiguity and races.",
+      "resolution": "Portfolio Service synchronously commits a Pending operation and outbox entry before returning. RabbitMQ continues an already durable operation; it does not create the operation."
+    },
+    {
+      "sequence": 19,
+      "area": "Multiple Portfolio Service instances",
+      "assistant": "Explained that process-local flags cannot enforce one refresh when several Portfolio instances exist. Proposed atomic create-or-find and claim transitions in shared service-owned PostgreSQL state, with the losing request reading the winner's operation.",
+      "user": "Accepted PostgreSQL as the coordination point.",
+      "context": "The exact low-level mechanism may be a uniqueness rule, conditional write, or lock and remains outside this high-level contract.",
+      "resolution": "Multi-instance correctness is database-coordinated, never in-memory."
+    },
+    {
+      "sequence": 20,
+      "area": "Recent refresh reuse policy",
+      "assistant": "Proposed returning the unfinished operation, then returning a recently completed operation inside a configurable interval, and creating a new operation only after the interval expires. Mentioned inability to refresh immediately as a drawback.",
+      "user": "Accepted the behavior and corrected the framing: inability to start again during the interval is the chosen policy, not a drawback.",
+      "context": "The policy protects against delayed network repeats and double invocation without exposing idempotency mechanics to the caller.",
+      "resolution": "Describe recent-result reuse as explicit product policy."
+    },
+    {
+      "sequence": 21,
+      "area": "Refresh lifecycle and recovery",
+      "assistant": "Proposed Pending, Running, Succeeded, PartiallySucceeded, and Failed. Proposed no user cancellation in the first slice, safe recovery after worker death, and terminal failure after configurable attempts or deadline.",
+      "user": "Accepted but corrected that multi-account refresh cannot have only one error code; it needs a list of stable error codes/errors.",
+      "context": "Errors can belong to individual accounts or to the operation, and multiple attempts can yield more than one relevant error.",
+      "resolution": "Use the five operation states plus structured lists of account-scoped and operation-scoped errors."
+    },
+    {
+      "sequence": 22,
+      "area": "Freshness and degradation",
+      "assistant": "Proposed that successful snapshots begin Fresh, age to Stale by configurable threshold, and become immediately Stale after a failed newer attempt. No prior successful snapshot means Unavailable, and failed work never erases the last successful snapshot. Proposed NotConfigured, Ready, Degraded, and Unavailable portfolio states with explicit coverage.",
+      "user": "Accepted and noted that the freshness rule had already been discussed.",
+      "context": "A successful zero-position snapshot is valid and must not be confused with missing data. Refreshing is an activity overlay and must preserve the prior snapshot's quality disclosure.",
+      "resolution": "Adopt per-account freshness plus honest portfolio-level availability and coverage."
+    },
+    {
+      "sequence": 23,
+      "area": "Snapshot atomicity",
+      "assistant": "Proposed no tenant-wide transaction. Each successful account snapshot commits atomically and independently; failed accounts retain prior data. Reads may therefore combine different snapshot times and must disclose them.",
+      "user": "Accepted.",
+      "context": "Per-account atomicity enables partial success and avoids exposing partially written positions while keeping successful accounts useful.",
+      "resolution": "Guarantee atomicity at account-snapshot level, not across the whole tenant portfolio."
+    },
+    {
+      "sequence": 24,
+      "area": "Account retries and bounded concurrency",
+      "assistant": "Proposed independent account processing; configured retries/backoff for network, throttling, and temporary provider errors; no automatic retry for errors requiring Owner action; configured parallelism; aggregate result only after each target has a terminal outcome.",
+      "user": "Accepted.",
+      "context": "This prevents one bad account from blocking all others while avoiding useless credential retries.",
+      "resolution": "Adopt retryability-based account execution and bounded parallelism."
+    },
+    {
+      "sequence": 25,
+      "area": "Avoiding repeated interview questions",
+      "assistant": "Reintroduced Tenant Service ownership of the provisioning projection as a question.",
+      "user": "Pointed out that it had already been discussed and instructed that accepted matters should not be brought back for approval.",
+      "context": "Repeated confirmation made the interview harder to follow and risked reopening settled decisions.",
+      "resolution": "Treat Tenant Service projection ownership as accepted and maintain a decision ledger so later questions cover only genuinely new branches or contradictions."
+    },
+    {
+      "sequence": 26,
+      "area": "Broker credential encryption and rotation",
+      "assistant": "Proposed Portfolio-owned encrypted credentials, versioned keys, connectionId-only messages, just-in-time decryption around adapter calls, no plaintext telemetry, gradual rotation, and safe failure when key material is unavailable.",
+      "user": "Accepted but asked where key material actually lives.",
+      "context": "The first answer suggested a protected host-mounted key ring, which the user rejected because several containers need a coherent solution and asked why protected keys could not be stored in the database.",
+      "resolution": "Use envelope encryption: encrypted credentials and wrapped data keys may live in PostgreSQL, but the root key-encryption key must remain external. Multiple instances use a centralized key manager."
+    },
+    {
+      "sequence": 27,
+      "area": "Local and deployed key providers",
+      "assistant": "Explained the distinction between KMS/Vault transit operations, where the master key need not leave the manager, and secret-manager file injection. Explained that plain Docker Compose does not itself provide a corporate key manager. Proposed local development test material and an external provider for deployed mode.",
+      "user": "Approved envelope encryption and specified that local development reads a test key from .env.",
+      "context": "The .env file is development-only, untracked, and must never be committed. Exact KMS/Vault product and algorithms remain open.",
+      "resolution": "Dev uses an explicit test .env key; deployed mode requires an external centralized key manager behind a replaceable provider."
+    },
+    {
+      "sequence": 28,
+      "area": "Activation secret in asynchronous email",
+      "assistant": "Proposed encrypting the one-time activation secret inside the Email delivery message, leaving only nonsecret identifiers and template metadata in ordinary fields. Proposed Identity encrypt-only and Email decrypt-only permissions with key versions and retained old decrypt versions during rotation.",
+      "user": "Accepted and asked how encryption/decryption authority would work.",
+      "context": "The refined model uses Email-owned decryption identity or keypair. Identity gets only the public key or encrypt capability; Email gets decrypt capability. Local development uses dev-only material and deployed private key authority stays in the external manager where possible.",
+      "resolution": "Adopt permission-separated delivery encryption; exact algorithm remains a focused low-level security decision."
+    },
+    {
+      "sequence": 29,
+      "area": "Local versus centralized audit",
+      "assistant": "Compared local audit, central Audit Service, and a hybrid. Local audit supports atomic business-plus-audit commit but complicates global search. A central service simplifies search and policy but creates a new dependency and cannot atomically participate in every service transaction. Recommended local authoritative records with a future central projection.",
+      "user": "Selected local audit and required a single format/library across services, then raised concern that a shared database table would undermine service ownership.",
+      "context": "A common persistence repository or table would create shared ownership even inside one PostgreSQL schema.",
+      "resolution": "Each service owns separate audit tables, migrations, repository, and runtime role. A versioned common library defines only the envelope, validation, and redaction rules."
+    },
+    {
+      "sequence": 30,
+      "area": "Migration from local to hybrid audit",
+      "assistant": "Explained that globally unique auditEventId, schemaVersion, common envelope, and local append-only records make later hybrid audit straightforward. A future central consumer can ingest AuditRecorded through outbox and backfill history, while local records remain authoritative. Moving to central-only truth would be much harder and was not recommended.",
+      "user": "Accepted designing the local format as the future AuditRecorded envelope without implementing Audit Service or publication in this slice.",
+      "context": "This keeps the slice small while preserving an evolutionary path.",
+      "resolution": "Local audit now; central asynchronous search/reporting projection later if needed."
+    },
+    {
+      "sequence": 31,
+      "area": "Observability and poison messages",
+      "assistant": "Proposed structured logs, OpenTelemetry-compatible trace propagation through HTTP/RabbitMQ/broker/SMTP, metrics for operations and freshness, backlog/stuck alerts, dependency health, and strict secret redaction. Separately proposed configured retries, inbox deduplication, DLQ after exhaustion, terminalization of stuck operations, and explicit operator replay.",
+      "user": "Accepted both policies.",
+      "context": "Specific telemetry backend and alert transport remain open; observability itself is a readiness requirement.",
+      "resolution": "Adopt the minimum observability baseline and explicit poison-message recovery policy."
+    },
+    {
+      "sequence": 32,
+      "area": "Connection shutdown simplification",
+      "assistant": "Proposed reversible Disable, Reconnect through validation, and permanent Revoked removal.",
+      "user": "Rejected the complexity for the first slice: only disconnect or create a new connection. Said richer distinctions may remain for the broader MVP but are unnecessary now. Accepted automatically excluding associated accounts.",
+      "context": "The terminal operation deletes credentials, keeps only nonsecret history/audit under retention policy, and cannot be reversed.",
+      "resolution": "First slice has terminal disconnect only. Resume access by creating a new connection."
+    },
+    {
+      "sequence": 33,
+      "area": "Manager/Viewer onboarding boundary",
+      "assistant": "Noted that the slice must enforce Owner, Manager, and Viewer but approved onboarding creates only an initial Owner. Proposed implementing all permission bundles and testing Manager/Viewer with prepared memberships while deferring invitations and user-facing creation.",
+      "user": "Accepted.",
+      "context": "This verifies authorization without expanding the first vertical user journey.",
+      "resolution": "Only Owner onboarding is end to end; Manager/Viewer membership creation is outside the slice."
+    },
+    {
+      "sequence": 34,
+      "area": "No included accounts and duplicate account work",
+      "assistant": "Proposed rejecting manual refresh synchronously when no accounts are included. Later asked whether an initial import and tenant refresh should share an in-flight account fetch.",
+      "user": "Accepted the no-account rejection. On duplicate account work, pointed out that the principle had already been discussed and that repeated broker requests naturally must not execute.",
+      "context": "The portfolio remains NotConfigured when no account is included. One account has at most one in-flight fetch regardless of which operation needs its result.",
+      "resolution": "Reject empty-target refresh; deduplicate account work and do not reopen the decision."
+    },
+    {
+      "sequence": 35,
+      "area": "Rate limiting and deployment boundary",
+      "assistant": "Initially proposed configurable rate limiting for sign-in, activation verification, and resend. After the user found the terminology unclear, explained it as protection from password/code guessing and email spam. Then described deferral as an accepted risk and suggested limiting the slice to local/controlled deployment.",
+      "user": "Decided rate limiting is not in the first slice but is mandatory for the full MVP. Corrected that there is no meaningful exposure risk inside the chosen boundary because neither the slice nor even the MVP will be production or public; both are local dev.",
+      "context": "The security gap becomes blocking only if the deployment boundary changes. The MVP requirement is retained as completeness work, not as mitigation for current public exposure.",
+      "resolution": "Record local-dev-only deployment, defer rate limiting from the slice, require it for MVP, and do not mislabel the local slice as accepting production exposure risk."
+    },
+    {
+      "sequence": 36,
+      "area": "Future Laya/Jev Decision Layer note",
+      "assistant": "Paused the Portfolio interview to investigate Laya after the user described a local-first confidence cascade. Identified Laya as a local typed-decision model and Jev as a hosted typed-decision provider. Warned that confidence thresholds require per-task calibration and cannot alone authorize financial action.",
+      "user": "Confirmed this belongs to a future Decision Layer but requested that it be documented anyway, and later required Jev to be represented explicitly too.",
+      "context": "The original slice constraints prohibit designing Decision Layer as part of Portfolio Foundation, so the note was created separately with status intention.",
+      "resolution": "Create a separate Laya/Jev cascade intention with both as first-class research candidates, evaluation requirements, safety boundary, and explicit non-decisions."
+    },
+    {
+      "sequence": 37,
+      "area": "Functional readiness",
+      "assistant": "Asked whether activation through real/test email should be the slice readiness proof.",
+      "user": "Corrected that activation alone is insufficient and that this had already been discussed. Slice readiness requires the user to see portfolio positions.",
+      "context": "Email activation is a required stage, but the vertical value is not demonstrated until broker positions are imported and readable.",
+      "resolution": "The decisive end-to-end readiness criterion is visible real Alpaca paper positions, plus observable refresh and honest freshness/coverage."
+    },
+    {
+      "sequence": 38,
+      "area": "Portfolio views and instrument meaning",
+      "assistant": "Asked whether the same instrument held in multiple accounts should be summed while retaining an account breakdown. The phrase same instrument was initially unclear and was restated with an Apple-share example, noting that ticker text alone may be ambiguous.",
+      "user": "Specified that the portfolio must be available in two forms: consolidated and non-consolidated. Confirmed both are mandatory in the first slice.",
+      "context": "The account view preserves source positions. The consolidated view merges only reliably identified same-currency instruments and retains contributing-account detail.",
+      "resolution": "Require both read views; leave exact canonical identity and aggregation formula as explicit open contract questions."
+    },
+    {
+      "sequence": 39,
+      "area": "Currency boundary",
+      "assistant": "Proposed avoiding sums across currencies and initially suggested totals grouped by currency.",
+      "user": "Explained that the old small project was USD-only but the new model needs currency. For the first slice, show each position in the currency in which it exists on the account and do not calculate currency totals.",
+      "context": "There is no base currency, FX conversion, or per-currency portfolio total in the slice. Differently denominated positions are not consolidated together.",
+      "resolution": "Preserve/display position currency only; defer all monetary aggregation and FX semantics."
+    },
+    {
+      "sequence": 40,
+      "area": "Interview completion and specification structure",
+      "assistant": "Declared coverage complete and offered HTML preview or direct Markdown. After the user chose Markdown, proposed a single architecture file plus state file.",
+      "user": "Requested splitting the specification by responsibility zones and using the vertical slice itself as an index. Accepted the proposed directory containing a master index and separate ownership, onboarding, broker, portfolio, cross-service, security, readiness, and decisions/open-questions documents.",
+      "context": "The number of major coverage areas exceeded the skill's split threshold, and a single long document would obscure ownership boundaries.",
+      "resolution": "Create a split OKF bundle under knowledge/vertical-slices/portfolio-foundation with index.md as the master specification."
+    },
+    {
+      "sequence": 41,
+      "area": "Mermaid and verification",
+      "assistant": "Explained that Mermaid is the Markdown diagram syntax and used flowchart, stateDiagram-v2, and sequenceDiagram. Promised a separate final verification pass.",
+      "user": "Confirmed the split structure, asked whether diagrams were Mermaid, and explicitly required that nothing be forgotten and everything be rechecked after generation.",
+      "context": "The generated bundle was checked for required-topic coverage, JSON validity, frontmatter, relative links, balanced code fences, decisions versus open questions, and consistency with approved parent documents. Mermaid CLI was unavailable, so diagram structure was checked textually rather than rendered by a CLI.",
+      "resolution": "The bundle contains 13 Mermaid diagrams and passed structural/content checks; no implementation artifacts were created."
+    },
+    {
+      "sequence": 42,
+      "area": "Interview-state quality correction",
+      "assistant": "Originally wrote a compact state containing 43 paraphrased question/answer summaries. When asked, acknowledged that it was adequate only as a resume snapshot and too thin as a durable architecture-interview record. Explained that optimizing for compactness incorrectly discarded objections, corrections, and decision evolution.",
+      "user": "Asked why the state was made thin, then requested a proper state file. Allowed questions, answers, and clarifications to be rewritten but required the context to be preserved.",
+      "context": "The interview skill calls for all Q&A pairs and resume behavior. A durable state must be self-contained even if the original chat is unavailable.",
+      "resolution": "Upgrade the state to schema version 2 with this chronological contextual interview log plus a separate compact decision summary."
+    }
+  ],
+  "decisionSummary": [
+    {
+      "topic": "Provisioning result",
+      "question": "When is tenant plus initial Owner provisioning considered accepted?",
+      "answer": "Return an asynchronous operation after Tenant Service commits the tenant and outbox; observe Owner and email stages later."
+    },
+    {
+      "topic": "Tenant lifecycle",
+      "question": "How does tenant activation progress?",
+      "answer": "Provisioning to AwaitingOwnerActivation to Active; provisioning failure is operation state, and the active-Owner invariant starts at Active."
+    },
+    {
+      "topic": "Activation policy",
+      "question": "How are code lifetime and verification attempts handled?",
+      "answer": "Both are configuration. Codes are hashed, single-use, and superseded on resend; remaining proposed rules were accepted."
+    },
+    {
+      "topic": "Configuration principle",
+      "question": "Should operational numeric values be hardcoded?",
+      "answer": "No. Values such as lifetimes, attempts, timeouts, retries, and thresholds are configuration with validation."
+    },
+    {
+      "topic": "JWT policy",
+      "question": "How are access and refresh tokens handled?",
+      "answer": "Short configurable access JWT, rotated/revocable refresh token, and no immediate distributed revocation of an already issued access JWT."
+    },
+    {
+      "topic": "Roles and permissions",
+      "question": "Are roles checked directly?",
+      "answer": "No. Permissions are independent; Owner, Manager, and Viewer are fixed bundles with no custom roles or direct per-user grants in the slice."
+    },
+    {
+      "topic": "Role capabilities",
+      "question": "What may Owner, Manager, and Viewer do?",
+      "answer": "Owner manages broker connections; Owner and Manager refresh; all three read portfolio/freshness/status; Admin CLI provisioning is operator-only."
+    },
+    {
+      "topic": "Connection/account distinction",
+      "question": "What is the relationship between broker connection and account?",
+      "answer": "They are distinct. Cardinality is adapter-specific and only explicitly selected accounts are included."
+    },
+    {
+      "topic": "Provider-specific environment",
+      "question": "Is paper/live a universal account field or rejection rule?",
+      "answer": "No architectural decision was made. Such representation may differ by broker and must not be generalized from Alpaca."
+    },
+    {
+      "topic": "Broker adapter",
+      "question": "What does the adapter own?",
+      "answer": "Provider validation, account discovery, position retrieval, normalization, and provider-error translation only; no persistence, selection, authorization, refresh orchestration, or consolidation."
+    },
+    {
+      "topic": "Connection validation",
+      "question": "Is broker validation synchronous?",
+      "answer": "No. Credentials are encrypted and validation is an observable asynchronous operation."
+    },
+    {
+      "topic": "Connection lifecycle",
+      "question": "Which validation states are needed?",
+      "answer": "PendingValidation, Ready, ActionRequired, and TemporarilyUnavailable were accepted; terminal disconnect later replaced reversible disable/reconnect for this slice."
+    },
+    {
+      "topic": "Error messages",
+      "question": "How are codes translated for users?",
+      "answer": "Each service owns stable codes and its own message catalogue behind a common error format. There is no central error service."
+    },
+    {
+      "topic": "Account inclusion",
+      "question": "Does inclusion need a lifecycle?",
+      "answer": "No. Use included true/false; keep portfolio data status separate."
+    },
+    {
+      "topic": "Initial import",
+      "question": "What happens when an account becomes included?",
+      "answer": "Start an automatic asynchronous initial import and return its operation identifier."
+    },
+    {
+      "topic": "Refresh target set",
+      "question": "May account membership change an in-flight refresh?",
+      "answer": "No. Capture included accounts at acceptance; later changes apply to separate/next work."
+    },
+    {
+      "topic": "Concurrent refresh",
+      "question": "What happens to parallel tenant refresh requests?",
+      "answer": "Only one unfinished refresh exists; all callers receive the same operation identifier and each request is audited."
+    },
+    {
+      "topic": "Queued acceptance",
+      "question": "How can the API know refresh is running before RabbitMQ delivery?",
+      "answer": "Portfolio Service synchronously commits Pending operation plus outbox before returning; RabbitMQ only continues execution."
+    },
+    {
+      "topic": "Multiple Portfolio instances",
+      "question": "How is refresh coordinated across instances?",
+      "answer": "Through atomic shared Portfolio PostgreSQL state, never process-local locks."
+    },
+    {
+      "topic": "Rapid repeat policy",
+      "question": "How are double calls after completion handled?",
+      "answer": "Reuse unfinished work and a terminal result inside a configurable recent-operation interval; after that create a new operation. This is policy, not a limitation."
+    },
+    {
+      "topic": "Refresh lifecycle",
+      "question": "Which operation states and recovery apply?",
+      "answer": "Pending, Running, Succeeded, PartiallySucceeded, Failed; safely reclaim crashed work and fail after configured attempts/deadline."
+    },
+    {
+      "topic": "Multiple errors",
+      "question": "Does a refresh have one error code?",
+      "answer": "No. It has lists of stable account-scoped and operation-scoped errors, including multiple attempts."
+    },
+    {
+      "topic": "Freshness",
+      "question": "When is account data stale or unavailable?",
+      "answer": "Successful data starts fresh, ages to stale by configuration, and becomes immediately stale after a failed newer attempt; no successful snapshot means unavailable."
+    },
+    {
+      "topic": "Portfolio degradation",
+      "question": "Which portfolio states apply?",
+      "answer": "NotConfigured, Ready, Degraded, and Unavailable, with explicit coverage and valid empty snapshots."
+    },
+    {
+      "topic": "Snapshot consistency",
+      "question": "Is the entire tenant portfolio atomically replaced?",
+      "answer": "No. Each account snapshot is atomic and independently visible; mixed snapshot times are disclosed."
+    },
+    {
+      "topic": "Retries",
+      "question": "How are per-account failures handled?",
+      "answer": "Retry only transient errors with configurable backoff/attempts, continue other accounts, and bound parallelism by configuration."
+    },
+    {
+      "topic": "Provisioning projection",
+      "question": "Who owns the end-to-end onboarding status?",
+      "answer": "Tenant Service owns the provisioning operation/projection and consumes Identity/Email facts without owning their data."
+    },
+    {
+      "topic": "Credential encryption",
+      "question": "How are broker credentials protected and rotated?",
+      "answer": "Envelope encryption with versioned wrapped keys; credentials never enter messages; plaintext exists only around adapter calls."
+    },
+    {
+      "topic": "Key storage",
+      "question": "Where is broker root key material held?",
+      "answer": "Local development uses a test .env key. Deployed environments use an external centralized key manager; exact product remains open."
+    },
+    {
+      "topic": "Activation message encryption",
+      "question": "How is an activation code protected in asynchronous delivery?",
+      "answer": "Identity is encrypt-only, Email is decrypt-only, with key versions and deployed external key management."
+    },
+    {
+      "topic": "Audit ownership",
+      "question": "Local or central audit?",
+      "answer": "Service-local authoritative audit in separate service-owned tables under one contract-only library/format; future central audit is an asynchronous projection."
+    },
+    {
+      "topic": "Observability",
+      "question": "What is the minimum baseline?",
+      "answer": "Structured logs, OpenTelemetry-compatible traces, metrics, health/readiness, configurable alerts, and complete secret redaction."
+    },
+    {
+      "topic": "Poison messages",
+      "question": "What happens after repeated message-processing failure?",
+      "answer": "Move to DLQ, audit/metric/alert, terminate associated stuck operation safely, and require explicit operator replay."
+    },
+    {
+      "topic": "Disconnect",
+      "question": "Is connection disable/reconnect needed in the first slice?",
+      "answer": "No. Disconnect is terminal, credentials are destroyed, linked accounts are excluded, and access resumes through a new connection. Richer lifecycle may be revisited later."
+    },
+    {
+      "topic": "Manager and Viewer onboarding",
+      "question": "Must the slice create non-Owner users?",
+      "answer": "No. Implement/test permissions with prepared memberships; invitations and user-facing creation are deferred."
+    },
+    {
+      "topic": "No included accounts",
+      "question": "Should refresh run without included accounts?",
+      "answer": "No. Reject synchronously with a stable error and keep portfolio NotConfigured."
+    },
+    {
+      "topic": "Duplicate account work",
+      "question": "May initial import and tenant refresh fetch one account simultaneously?",
+      "answer": "No. Reuse one in-flight account fetch; repeat broker requests are not performed."
+    },
+    {
+      "topic": "Rate limiting and deployment",
+      "question": "Is public-endpoint rate limiting required now?",
+      "answer": "Not in the first slice; it remains mandatory for the complete MVP. Both slice and MVP are local dev only, not production/public systems."
+    },
+    {
+      "topic": "Portfolio views",
+      "question": "How are positions displayed?",
+      "answer": "Both account-level and consolidated views are mandatory; consolidated positions retain account breakdown and require reliable instrument identity."
+    },
+    {
+      "topic": "Currency",
+      "question": "Are monetary values aggregated across currencies?",
+      "answer": "No. Display each position currency as held; no currency totals, base currency, or FX in the first slice."
+    },
+    {
+      "topic": "Readiness",
+      "question": "What user outcome proves slice readiness?",
+      "answer": "The user sees real imported portfolio positions. Activation alone is not sufficient."
+    },
+    {
+      "topic": "Decision Layer note",
+      "question": "Should the Laya/Jev local-first cascade be documented?",
+      "answer": "Yes, as a separate intention document with Laya and Jev both first-class research candidates; it remains outside this slice."
+    },
+    {
+      "topic": "Specification layout",
+      "question": "One document or split specification?",
+      "answer": "Split by responsibility zones and use the vertical-slice index as the master specification."
+    }
+  ],
+  "outputFiles": [
+    "knowledge/vertical-slices/portfolio-foundation/index.md",
+    "knowledge/vertical-slices/portfolio-foundation/service-ownership.md",
+    "knowledge/vertical-slices/portfolio-foundation/onboarding-and-access.md",
+    "knowledge/vertical-slices/portfolio-foundation/broker-connections.md",
+    "knowledge/vertical-slices/portfolio-foundation/portfolio-refresh-and-views.md",
+    "knowledge/vertical-slices/portfolio-foundation/cross-service-contracts.md",
+    "knowledge/vertical-slices/portfolio-foundation/security-audit-observability.md",
+    "knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness.md",
+    "knowledge/vertical-slices/portfolio-foundation/decisions-and-open-questions.md"
+  ]
+}
