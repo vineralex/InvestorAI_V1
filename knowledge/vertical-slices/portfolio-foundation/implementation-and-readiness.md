@@ -3,7 +3,7 @@ type: specification
 title: Portfolio Foundation Implementation and Readiness
 description: Dependency order, verification strategy, and architecture and functional readiness gates for the Portfolio Foundation slice.
 tags: [vertical-slice, implementation-order, testing, readiness, acceptance]
-updated_at: 2026-09-23
+updated_at: 2026-09-27
 status: draft
 ---
 
@@ -12,10 +12,24 @@ status: draft
 This document defines a future implementation sequence and completion gates. It
 does not authorize implementation as part of the present specification task.
 
+## Implementation discipline
+
+Use the simplest correct implementation that preserves the approved service,
+security, tenancy, and consistency boundaries. A separate project or abstraction
+is introduced only when there is a second concrete implementation, a real need
+to isolate a dependency, or an already approved invariant that requires a
+compile-time boundary. Folder and namespace boundaries are sufficient until
+one of those conditions exists.
+
+The bootstrap decisions below do not settle the open API, message, database, or
+security contracts recorded in
+[Decisions and open questions](decisions-and-open-questions.md).
+
 ## Dependency-ordered implementation plan
 
 ```mermaid
 flowchart TD
+    Z[0. Repository bootstrap]
     A[1. Contract and isolation foundation]
     B[2. Identity permissions and tokens]
     C[3. Tenant provisioning and activation]
@@ -27,6 +41,7 @@ flowchart TD
     I[9. Portfolio read views]
     J[10. Recovery, observability, and end-to-end proof]
 
+    Z --> A
     A --> B
     A --> C
     B --> C
@@ -41,6 +56,66 @@ flowchart TD
     I --> J
     A --> J
 ```
+
+### 0. Repository bootstrap
+
+The project owner executes this milestone from a step-by-step runbook. It
+creates a reproducible repository foundation without implementing business
+behavior or pretending that unresolved contracts are settled.
+
+Initial solution shape:
+
+```text
+src/
+  Tenant/
+    InvestorAI.Tenant.Service
+    InvestorAI.Tenant.DatabaseMigrator
+  Identity/
+    InvestorAI.Identity.Service
+    InvestorAI.Identity.DatabaseMigrator
+  Email/
+    InvestorAI.Email.Worker
+    InvestorAI.Email.DatabaseMigrator
+  Portfolio/
+    InvestorAI.Portfolio.Service
+    InvestorAI.Portfolio.DatabaseMigrator
+    InvestorAI.Portfolio.Providers.Alpaca
+  BuildingBlocks/
+    InvestorAI.Observability
+    InvestorAI.Messaging
+tools/
+  InvestorAI.AdminCli
+  InvestorAI.DevCli
+```
+
+Bootstrap work:
+
+- pin .NET 10 through `global.json` and create `InvestorAI.slnx`;
+- centralize common SDK project properties in `Directory.Build.props` and NuGet
+  versions in `Directory.Packages.props`;
+- enable nullable reference types and the agreed moderate analyzer policy;
+- create only the projects shown above, without separate Domain, Application,
+  or generic Infrastructure projects;
+- prepare one-shot service-owned migrators using Dapper, Npgsql, DbUp, embedded
+  SQL resources, separate journals, and distinct migration/runtime role
+  configuration;
+- add Docker Compose services for PostgreSQL 18 and RabbitMQ 4.3 only, using
+  supported pinned patch tags and localhost-safe port exposure;
+- establish xUnit as the test framework and reserve Testcontainers for tests
+  that make PostgreSQL or RabbitMQ correctness claims;
+- document repeatable restore, build, test, Compose start, health-check, and
+  cleanup commands.
+
+Bootstrap explicitly excludes business entities and workflows, database
+schemas beyond the minimum needed to prove the migrator boundary, a universal
+message bus, Mailpit, CI/CD, and speculative framework abstractions. Mailpit is
+introduced with activation/email delivery, and CI/CD becomes a gate only after
+a meaningful test suite exists.
+
+Exit gate: the documented commands restore and build the full solution, run the
+current test command successfully, start healthy PostgreSQL and RabbitMQ
+containers, and demonstrate that runtime service credentials cannot perform
+DDL. No source or runtime dependency points to `D:\Projects\InvestorAi`.
 
 ### 1. Contract and isolation foundation
 

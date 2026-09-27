@@ -3,7 +3,7 @@ type: decision-log
 title: Portfolio Foundation Decisions and Open Questions
 description: Accepted decisions, superseded alternatives, deferred capabilities, and unresolved design questions for the Portfolio Foundation slice.
 tags: [vertical-slice, decisions, open-questions, portfolio]
-updated_at: 2026-09-23
+updated_at: 2026-09-27
 status: draft
 ---
 
@@ -50,6 +50,28 @@ status: draft
 | PF-035 | The first slice and MVP are local/dev only; public/production exposure is not a readiness goal. | Matches project intent and current security posture. |
 | PF-036 | Public endpoint rate limiting is deferred from the first slice but remains mandatory for the complete MVP. | It is not needed for the controlled local slice boundary but must not be forgotten. |
 | PF-037 | Functional slice readiness requires the user to see real portfolio positions, not merely complete activation. | Anchors completion in vertical user value. |
+
+## Accepted implementation bootstrap decisions
+
+These decisions define the executable repository bootstrap only. They do not
+close the remaining API, message, database, or security contract questions and
+do not constitute a complete implementation plan for the slice.
+
+| ID | Decision | Rationale or consequence |
+| --- | --- | --- |
+| PF-038 | Delivery proceeds through independently verifiable milestones with mandatory exit gates. The first milestone is a step-by-step bootstrap runbook executed by the project owner. | Keeps progress reviewable and makes the initial setup educational and reproducible. |
+| PF-039 | Use earned abstractions: add a project or abstraction only for a second concrete implementation, required dependency isolation, or an already approved invariant. | Prevents architecture-astronautics while preserving deliberate service boundaries. |
+| PF-040 | Start each service with one executable project plus its database migrator rather than separate Domain, Application, and Infrastructure projects. Use folders and namespaces until a compile-time boundary earns a separate project. | Avoids empty layering projects and permits later extraction without changing service ownership. |
+| PF-041 | The initial project set is `Tenant.Service`, `Identity.Service`, `Portfolio.Service`, `Email.Worker`, one `DatabaseMigrator` per service, `Portfolio.Providers.Alpaca`, `AdminCli`, `DevCli`, and minimal `Observability` and `Messaging` building blocks. | Creates only slice-owned deployables, explicit migration executables, the first provider boundary, and narrowly scoped shared technical code. |
+| PF-042 | Standardize on .NET 10, `InvestorAI.slnx`, a pinned SDK in `global.json`, common MSBuild properties in `Directory.Build.props`, and NuGet Central Package Management in `Directory.Packages.props`. | Gives the repository one reproducible toolchain and avoids duplicated framework and package versions. |
+| PF-043 | Enable nullable reference types and the recommended built-in .NET analyzers. Analyzer findings remain warnings by default; only selected correctness and security rules fail the build, and style rules do not block it. | Establishes useful static checks without turning formatting preferences or the full analyzer catalogue into delivery blockers. |
+| PF-044 | Use Dapper and Npgsql for persistence and DbUp for explicit PostgreSQL migrations. Each service has embedded SQL resources, its own migration journal, a one-shot migrator using a migration role, and a restricted runtime role without DDL privileges. | Fits RLS, grants, partial indexes, outbox/inbox, and worker-claim SQL while keeping migration authority out of runtime services. |
+| PF-045 | Bootstrap targets PostgreSQL 18 and RabbitMQ 4.3. Exact supported patch tags are pinned when the runbook is authored and updated deliberately; floating `latest` tags are prohibited. | Uses current stable major lines while keeping local environments reproducible. |
+| PF-046 | Use xUnit as the test framework and Testcontainers for integration tests that claim PostgreSQL or RabbitMQ behavior. Docker Compose is for the complete local environment and end-to-end journeys. | Retains a familiar test framework and verifies infrastructure guarantees against real dependencies. |
+| PF-047 | Distinguish targeted integration commands from published facts/events. Do not introduce MediatR, an internal CQRS bus, or a universal enterprise bus by default; shared messaging code grows only from concrete cross-service paths. | Preserves message semantics without creating an unused internal framework. |
+| PF-048 | Keep provider implementations behind Portfolio-owned neutral capabilities; Alpaca is isolated in `Portfolio.Providers.Alpaca`, and provider SDK types do not leave that project. | Makes the first provider replaceable without splitting every infrastructure concern into a project prematurely. |
+| PF-049 | `DevCli` is an intentionally privileged, developer-only diagnostic tool that may call application and adapter code directly. It is excluded from runtime deployment and cannot serve as unit, integration, security, or end-to-end evidence. | Supports personal exploration without weakening runtime boundaries or readiness claims. |
+| PF-050 | Add Mailpit only with the activation/email milestone, not during repository bootstrap. Defer CI/CD until a meaningful test suite exists. | Introduces supporting infrastructure when a real behavior needs it rather than front-loading empty automation. |
 
 ## Superseded or rejected alternatives
 
@@ -100,15 +122,21 @@ design. They are not permission to change the decisions above.
 12. Snapshot and operation-history retention, pruning, and archival policies.
 13. Full error-code catalogue, safe parameters, initial language, and fallback
     wording.
-14. SMTP provider/configuration, templates, and operator handling after terminal
-    delivery failure.
-15. Exact API/worker process topology inside each independently deployable
-    service.
+14. Real SMTP provider/configuration, templates, and operator handling after
+    terminal delivery failure. Mailpit is selected only as the local/test SMTP
+    sink for the activation milestone.
+15. Ownership and project layout of versioned cross-service command and fact
+    contract assemblies.
 16. Telemetry backend, local dashboards, alert transport, and trace/metric
     retention.
 17. Exact operator authentication and credential provisioning for Admin CLI.
 18. Whether a Portfolio-completed fact is emitted in the first slice when no
     current consumer requires it, or introduced with the first consumer.
+19. Final policy and library choice for mocks and hand-written test doubles.
+20. Exact PostgreSQL, RabbitMQ, Mailpit, and other container patch tags selected
+    when each relevant runbook milestone is authored.
+21. CI provider workflow details, triggers, caching, and the point at which the
+    meaningful test suite makes CI a required delivery gate.
 
 ## Deferred beyond this slice
 

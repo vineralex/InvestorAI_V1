@@ -1,5 +1,7 @@
 # Project Instructions
 
+Обращайся к пользователю на «ты». Не используй обращение на «вы».
+
 For every repository task:
 
 1. Read [knowledge/index.md](knowledge/index.md) first.
