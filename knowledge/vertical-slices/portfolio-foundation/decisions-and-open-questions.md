@@ -3,7 +3,7 @@ type: decision-log
 title: Portfolio Foundation Decisions and Open Questions
 description: Accepted decisions, superseded alternatives, deferred capabilities, and unresolved design questions for the Portfolio Foundation slice.
 tags: [vertical-slice, decisions, open-questions, portfolio]
-updated_at: 2026-09-27
+updated_at: 2026-10-06
 status: draft
 ---
 
@@ -72,6 +72,8 @@ do not constitute a complete implementation plan for the slice.
 | PF-048 | Keep provider implementations behind Portfolio-owned neutral capabilities; Alpaca is isolated in `Portfolio.Providers.Alpaca`, and provider SDK types do not leave that project. | Makes the first provider replaceable without splitting every infrastructure concern into a project prematurely. |
 | PF-049 | `DevCli` is an intentionally privileged, developer-only diagnostic tool that may call application and adapter code directly. It is excluded from runtime deployment and cannot serve as unit, integration, security, or end-to-end evidence. | Supports personal exploration without weakening runtime boundaries or readiness claims. |
 | PF-050 | Add Mailpit only with the activation/email milestone, not during repository bootstrap. Defer CI/CD until a meaningful test suite exists. | Introduces supporting infrastructure when a real behavior needs it rather than front-loading empty automation. |
+| PF-051 | Bootstrap the existing PostgreSQL database and `public` schema using `infra/postgres/bootstrap.ps1` and numbered SQL files. Use two LOGIN roles per service: migration owns its objects; runtime receives specific object grants from service migrations. New runtime roles have no DDL, TEMPORARY, ownership, or BYPASSRLS authority. | Preserves service boundaries without an extra owner role or an AdminCli infrastructure feature. Business logic remains separate from PostgreSQL-specific SQL; multiple database providers are not a current goal. |
+| PF-052 | Infrastructure SQL files are repeatable, each with its own transaction; execute all by number without a journal and stop on the first failure. Existing roles and passwords are neither checked nor repaired; initial grants are reapplied. Read literal passwords from root `.env` and pass them through stdin to containerized psql. Group scripts under `SolutionItems/Postgres/SQL`. | Keeps the local bootstrap simple. Previously committed files survive a later failure; existing-role restrictions are not guaranteed or audited. See [implementation and readiness](implementation-and-readiness.md) for the run command and verification evidence. |
 
 ## Superseded or rejected alternatives
 
