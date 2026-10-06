@@ -159,7 +159,8 @@ ORDER BY rolname;
 ### Tenant DbUp migrator (2026-10-06)
 
 The Tenant migrator implements a one-shot console process with ServiceCollection
-DI and no Generic Host. Application services receive constructor dependencies;
+DI and no Generic Host. Its common infrastructure is now in
+`src/BuildingBlocks/InvestorAI.DatabaseMigrations`. Application services receive constructor dependencies;
 the solution-wide rule is in
 [implementation conventions](../../architecture/implementation-conventions.md).
 Only Tenant is implemented; the other three migrators remain templates.
@@ -264,16 +265,35 @@ skipping, ownership, and journal access isolation. Failure rollback remains
 verified by the separate test fixture; no failing migration was applied to the
 owner's database.
 
+### Shared migration infrastructure (2026-10-07)
+
+The reusable configuration, dotenv reading, connection settings, DbUp execution,
+safe output, and common DI registration are extracted into
+`InvestorAI.DatabaseMigrations` under BuildingBlocks. Tenant references this
+project. The other three service migrators are still unimplemented templates.
+
+`MigrationDefinition` carries service-owned metadata: service name, migration
+username, password environment key, journal schema/table, SQL assembly, and
+resource prefix. The shared code contains no Tenant-specific username, password
+key, journal name, resource prefix, or SQL scripts. DI creates the common
+services and supplies the definition as an immutable value object.
+
+Tenant retains Program.cs, its AddTenantMigrator registration, appsettings,
+launch profile, and embedded SQL. Its definition points at the Tenant executable
+assembly, not the shared library. Resource names remain `Tenant.Migrations.*`,
+the journal remains `public.tenant_schema_migrations`, and configuration priority,
+per-script transactions, output, exit codes, and connection application name
+are preserved. Existing journal entries therefore continue to match.
+
+The shared project is justified by the approved additional migrator consumers.
+It owns migration mechanics only, not business schemas or cross-service data.
+
 ### Next step
 
-Tenant's owner F5/pgAdmin verification is complete. Next, extract the reusable
-configuration, dotenv reading, connection settings, DbUp execution, and safe
-output into `InvestorAI.DatabaseMigrations` under BuildingBlocks, then connect
-Identity, Email, and Portfolio. DotEnvReader and MigrationSettings are included
-in this planned extraction. Each migrator retains its DI registration,
-migration username, password configuration key, journal name, and SQL resources.
-The shared project is now justified by the upcoming concrete additional
-consumers; extraction and the other migrators are not yet implemented.
+Tenant's owner F5/pgAdmin verification before extraction is complete. Connect
+Identity, Email, and Portfolio to the extracted library. Each migrator retains
+its DI registration, migration username, password configuration key, journal
+name, and SQL resources.
 Verify first/repeat runs, journal ownership, and journal access for each service.
 xUnit/test setup and the remaining milestone runbook commands are outstanding.
 

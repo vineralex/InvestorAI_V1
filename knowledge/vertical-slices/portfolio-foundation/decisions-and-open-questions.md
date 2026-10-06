@@ -3,7 +3,7 @@ type: decision-log
 title: Portfolio Foundation Decisions and Open Questions
 description: Accepted decisions, superseded alternatives, deferred capabilities, and unresolved design questions for the Portfolio Foundation slice.
 tags: [vertical-slice, decisions, open-questions, portfolio]
-updated_at: 2026-10-06
+updated_at: 2026-10-07
 status: draft
 ---
 
@@ -82,6 +82,12 @@ do not constitute a complete implementation plan for the slice.
 | PF-053 | Across the solution, application code does not construct services or their dependencies with `new`; DI creates them and supplies constructor dependencies. DTOs, value objects, and technical objects are exempt. | See [implementation conventions](../../architecture/implementation-conventions.md). This does not require a Generic Host. |
 | PF-054 | Implement and verify Tenant.DatabaseMigrator before the other three migrators. Use ServiceCollection, Options validation, and layered JSON/Development dotenv/process-environment configuration. Production never reads dotenv; migration username is fixed. | Supports F5 and published/container execution without duplicating local secrets or embedding them into deployment artifacts. |
 | PF-055 | Tenant migrations are embedded RunOnce SQL resources with stable names, ordinal ordering, journal `public.tenant_schema_migrations`, and a DbUp-managed transaction per file. Start with SELECT 1. Exit 0 on success/no changes and 1 on failure; suppress raw diagnostics and stop later scripts. | Proves execution/journaling without business tables. Unlike bootstrap, DbUp journals completed scripts and owns transaction boundaries. See [implementation and readiness](implementation-and-readiness.md). |
+
+## Shared migrator extraction (2026-10-07)
+
+| ID | Decision | Rationale or consequence |
+| --- | --- | --- |
+| PF-056 | Extract migration configuration, DotEnvReader, MigrationSettings, DbUp execution, safe output, and common DI registration into `InvestorAI.DatabaseMigrations` under BuildingBlocks. Each executable supplies a MigrationDefinition with service name, username, password key, journal, script assembly, and resource prefix; SQL remains service-owned. Tenant is the first consumer; Identity, Email, and Portfolio are next. | Approved additional consumers justify the shared project. Preserve Tenant resource names, journal, transactions, configuration priority, output, and exit codes so previously applied migrations remain recognized. |
 
 ## Superseded or rejected alternatives
 

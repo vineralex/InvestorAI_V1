@@ -1,4 +1,5 @@
 using InvestorAI.Tenant.DatabaseMigrator;
+using InvestorAI.DatabaseMigrations;
 using Microsoft.Extensions.DependencyInjection;
 
 internal class Program
@@ -10,7 +11,7 @@ internal class Program
 			using var services = new ServiceCollection()
 				.AddTenantMigrator()
 				.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
-			return services.GetRequiredService<TenantDatabaseMigrator>().Run();
+			return services.GetRequiredService<DatabaseMigrator>().Run();
 		}
 		catch (DotEnvReadException exception)
 		{

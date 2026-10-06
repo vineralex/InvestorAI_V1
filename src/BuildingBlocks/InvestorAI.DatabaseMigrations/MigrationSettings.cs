@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace InvestorAI.Tenant.DatabaseMigrator;
+namespace InvestorAI.DatabaseMigrations;
 
 public sealed class MigrationSettings
 {
@@ -9,13 +9,13 @@ public sealed class MigrationSettings
 	public string Name { get; set; } = "";
 	public string Password { get; set; } = "";
 
-	public string BuildConnectionString() => new NpgsqlConnectionStringBuilder
+	public string BuildConnectionString(MigrationDefinition definition) => new NpgsqlConnectionStringBuilder
 	{
 		Host = Host,
 		Port = Port,
 		Database = Name,
-		Username = "investorai_tenant_migration",
+		Username = definition.Username,
 		Password = Password,
-		ApplicationName = "InvestorAI.Tenant.DatabaseMigrator"
+		ApplicationName = $"InvestorAI.{definition.ServiceName}.DatabaseMigrator"
 	}.ConnectionString;
 }

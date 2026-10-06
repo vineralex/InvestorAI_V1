@@ -4,23 +4,23 @@ using DbUp.Engine.Output;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
-namespace InvestorAI.Tenant.DatabaseMigrator;
+namespace InvestorAI.DatabaseMigrations;
 
-public sealed class TenantDatabaseMigrator(IOptions<MigrationSettings> settings, IUpgradeLog upgradeLog)
+public sealed class DatabaseMigrator(IOptions<MigrationSettings> settings, IUpgradeLog upgradeLog, MigrationDefinition definition)
 {
 	public int Run()
 	{
 		try
 		{
-			var connectionString = settings.Value.BuildConnectionString();
-			var assembly = typeof(TenantDatabaseMigrator).Assembly;
+			var connectionString = settings.Value.BuildConnectionString(definition);
+			var assembly = definition.ScriptsAssembly;
 			var names = assembly.GetManifestResourceNames()
-				.Where(name => name.StartsWith("Tenant.Migrations.", StringComparison.Ordinal)
+				.Where(name => name.StartsWith(definition.ScriptPrefix, StringComparison.Ordinal)
 					&& name.EndsWith(".sql", StringComparison.Ordinal))
 				.Order(StringComparer.Ordinal).ToArray();
 			if (names.Length == 0)
 			{
-				Console.Error.WriteLine("No embedded Tenant migration scripts found.");
+				Console.Error.WriteLine($"No embedded {definition.ServiceName} migration scripts found.");
 				return 1;
 			}
 			var scripts = names.Select(name =>
@@ -32,7 +32,7 @@ public sealed class TenantDatabaseMigrator(IOptions<MigrationSettings> settings,
 			var engine = DeployChanges.To.PostgresqlDatabase(connectionString)
 				.WithScripts(scripts)
 				.WithScriptNameComparer(StringComparer.Ordinal)
-				.JournalToPostgresqlTable("public", "tenant_schema_migrations")
+				.JournalToPostgresqlTable(definition.JournalSchema, definition.JournalTable)
 				.WithTransactionPerScript()
 				.LogTo(upgradeLog)
 				.Build();
@@ -45,7 +45,7 @@ public sealed class TenantDatabaseMigrator(IOptions<MigrationSettings> settings,
 			}
 			foreach (var script in result.Scripts)
 				Console.WriteLine($"Applied {script.Name}.");
-			Console.WriteLine("Tenant database migrations completed.");
+			Console.WriteLine($"{definition.ServiceName} database migrations completed.");
 			return 0;
 		}
 		catch (OptionsValidationException exception)

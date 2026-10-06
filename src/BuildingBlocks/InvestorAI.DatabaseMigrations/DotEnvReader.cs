@@ -1,4 +1,4 @@
-namespace InvestorAI.Tenant.DatabaseMigrator;
+namespace InvestorAI.DatabaseMigrations;
 
 public sealed class DotEnvReader
 {
