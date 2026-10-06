@@ -163,7 +163,8 @@ DI and no Generic Host. Its common infrastructure is now in
 `src/BuildingBlocks/InvestorAI.DatabaseMigrations`. Application services receive constructor dependencies;
 the solution-wide rule is in
 [implementation conventions](../../architecture/implementation-conventions.md).
-Only Tenant is implemented; the other three migrators remain templates.
+Tenant was implemented first; the other three migrators now use the same
+shared infrastructure, with owner database verification pending as described below.
 
 Configuration priority is `appsettings.json`, then root `.env` in Development
 only, then process environment. `Database__Host`, `Database__Port`,
@@ -270,7 +271,7 @@ owner's database.
 The reusable configuration, dotenv reading, connection settings, DbUp execution,
 safe output, and common DI registration are extracted into
 `InvestorAI.DatabaseMigrations` under BuildingBlocks. Tenant references this
-project. The other three service migrators are still unimplemented templates.
+project. Identity, Email, and Portfolio now reference the shared project as well.
 
 `MigrationDefinition` carries service-owned metadata: service name, migration
 username, password environment key, journal schema/table, SQL assembly, and
@@ -288,13 +289,60 @@ are preserved. Existing journal entries therefore continue to match.
 The shared project is justified by the approved additional migrator consumers.
 It owns migration mechanics only, not business schemas or cross-service data.
 
+### Identity, Email, and Portfolio migrators (2026-10-07)
+
+All three are implemented using the shared library and the Tenant pattern:
+service-owned DI registration and MigrationDefinition, appsettings with
+localhost/5432/investorai and no password, a Development F5 profile, and an
+embedded `001_verify_migrator.sql` containing SELECT 1.
+
+| Service | Migration username | Password environment key | Journal in public | Resource prefix |
+| --- | --- | --- | --- | --- |
+| Identity | investorai_identity_migration | IDENTITY_MIGRATION_PASSWORD | identity_schema_migrations | Identity.Migrations. |
+| Email | investorai_email_migration | EMAIL_MIGRATION_PASSWORD | email_schema_migrations | Email.Migrations. |
+| Portfolio | investorai_portfolio_migration | PORTFOLIO_MIGRATION_PASSWORD | portfolio_schema_migrations | Portfolio.Migrations. |
+
+Each definition points to its own executable assembly. SQL stays service-owned.
+Tenant's resource names and journal are unchanged. Restore and full solution
+build passed with no errors; analyzer warnings remain for the existing Email
+Worker logging and unsealed Program classes. The assistant did not execute
+PostgreSQL checks for this change.
+
+Owner verification on 2026-10-07 confirmed first and repeat F5 runs for Identity,
+Email, and Portfolio, all with exit code 0. Each first run applied its own 001
+script; repeat runs reported completion without applying it again. Identity's
+journal retained one row and its timestamp; the owner confirmed journal
+ownership and isolation. Email's supplied pgAdmin results confirmed owner
+`investorai_email_migration` and access only for that role and `investorai_admin`;
+the journal row-count check was not explicitly reported. Portfolio's owner
+confirmed one row, corresponding migration-role ownership, and access only for
+that role and the administrator. Tenant's post-extraction F5 run exited 0
+without reapplying its existing migration.
+
+Post-extraction rollback verification passed through owner-run Tenant checks
+on 2026-10-07 in the existing database, with no separate test database. Temporary
+scripts 002_manual_rollback_before, 003_manual_rollback_failure, and
+004_manual_rollback_after create distinctly named verification tables; script
+003 deliberately divides by zero after CREATE TABLE. The process reported
+script 003 failure with SQLSTATE 22012 and exited 1. Owner pgAdmin results
+confirmed that 002 remained committed and journaled, 003 rolled back both DDL
+and journaling, and 004 never ran: only the before table existed, and the
+journal contained only 001 and 002. The owner then successfully committed
+targeted cleanup (DROP of the before table and DELETE of the exact 002 journal
+record). The assistant removed all three temporary SQL files. No corrected-file
+retry was performed in this manual check. Existing migration 001 was preserved.
+
+The owner explicitly changed verification ownership: all PostgreSQL checks are
+performed by the owner, including any temporary database fixtures. The assistant
+provides steps, reviews reported results, and performs only non-database checks.
+See [implementation conventions](../../architecture/implementation-conventions.md).
+This supersedes earlier permission to run assistant-owned database fixtures for
+subsequent work; historical results above remain historical evidence.
+
 ### Next step
 
-Tenant's owner F5/pgAdmin verification before extraction is complete. Connect
-Identity, Email, and Portfolio to the extracted library. Each migrator retains
-its DI registration, migration username, password configuration key, journal
-name, and SQL resources.
-Verify first/repeat runs, journal ownership, and journal access for each service.
+Confirm normal Tenant F5 execution after removal of the temporary scripts.
+Confirm Email's journal row count if it has not yet been checked.
 xUnit/test setup and the remaining milestone runbook commands are outstanding.
 
 The owner performs the setup in Visual Studio; the assistant guides and reviews.

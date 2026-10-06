@@ -33,4 +33,4 @@ architecture.
 - External credentials and delegated actions: [outbound identity and authorization](architecture/outbound-identity-and-authorization.md)
 - Future typed-decision routing: [Laya and Jev Decision Layer cascade](architecture/decision-layer-laya-jev-cascade-intention.md)
 - First vertical slice: [Portfolio Foundation](vertical-slices/portfolio-foundation/index.md)
-- Solution-wide DI and object creation rules: [implementation conventions](architecture/implementation-conventions.md)
+- Solution-wide DI, object creation, and owner-only PostgreSQL verification: [implementation conventions](architecture/implementation-conventions.md)

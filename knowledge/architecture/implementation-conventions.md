@@ -1,9 +1,9 @@
 ---
 type: policy
 title: Solution Implementation Conventions
-description: Approved dependency injection and object creation rules across the Investor AI solution.
-tags: [implementation, dependency-injection, conventions]
-updated_at: 2026-10-06
+description: Approved dependency injection, object creation, and owner-only PostgreSQL verification rules across the Investor AI solution.
+tags: [implementation, dependency-injection, conventions, verification, postgresql]
+updated_at: 2026-10-07
 status: approved
 ---
 
@@ -25,3 +25,23 @@ executables may use the DI container provided by their existing host.
 
 Follow the [implementation discipline](../vertical-slices/portfolio-foundation/implementation-and-readiness.md)
 when deciding whether an abstraction or another project is warranted.
+
+# PostgreSQL verification ownership
+
+The project owner performs all PostgreSQL verification. The assistant provides
+step-by-step commands and queries, reviews the owner's reported results, and
+records evidence in knowledge. The assistant must not independently execute
+PostgreSQL checks, migrations, or database verification fixtures, including
+those using isolated temporary containers.
+
+Assistant verification is limited to source inspection and restore/build or
+other checks that do not connect to PostgreSQL. Historical assistant database
+verification evidence remains valid as historical evidence; this rule applies
+to subsequent work. Record owner checks as complete only after actual reported
+results, never merely because instructions were provided.
+
+The owner does not use separate test databases for the current manual migrator
+verification. The approved rollback check runs only through Tenant in the
+owner's existing database, using temporary, distinctly named verification
+tables and scripts. The owner executes the check and subsequent targeted
+cleanup; existing application objects and migration records are preserved.

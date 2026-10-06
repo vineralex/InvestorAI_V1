@@ -1,7 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-  </PropertyGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="../../BuildingBlocks/InvestorAI.DatabaseMigrations/InvestorAI.DatabaseMigrations.csproj" />
+		<EmbeddedResource Include="Sql/*.sql" LogicalName="Portfolio.Migrations.%(Filename)%(Extension)" />
+		<None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
 </Project>

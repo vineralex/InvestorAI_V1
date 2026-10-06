@@ -38,4 +38,36 @@
 		<Project Path="tools/InvestorAI.AdminCli/InvestorAI.AdminCli.csproj" Id="fbd03fa8-8f3c-4926-8781-e7cf80f26169" />
 		<Project Path="tools/InvestorAI.DevCli/InvestorAI.DevCli.csproj" Id="fb92c6da-40b6-4e3a-86fc-6f3918c8e30f" />
 	</Folder>
+	<Folder Name="/knowledgebase/">
+		<File Path="knowledge/index.md" />
+	</Folder>
+	<Folder Name="/knowledgebase/architecture/">
+		<File Path="knowledge/architecture/agent-execution-boundaries.md" />
+		<File Path="knowledge/architecture/decision-layer-laya-jev-cascade-intention.md" />
+		<File Path="knowledge/architecture/execution-observability.md" />
+		<File Path="knowledge/architecture/implementation-conventions.md" />
+		<File Path="knowledge/architecture/inbound-identity-and-authorization.md" />
+		<File Path="knowledge/architecture/intentions.md" />
+		<File Path="knowledge/architecture/llm-usage-accounting.md" />
+		<File Path="knowledge/architecture/multi-tenant-data-isolation.md" />
+		<File Path="knowledge/architecture/mvp-architecture.md" />
+		<File Path="knowledge/architecture/outbound-identity-and-authorization.md" />
+		<File Path="knowledge/architecture/saas-control-plane.md" />
+	</Folder>
+	<Folder Name="/knowledgebase/product/">
+		<File Path="knowledge/product/.mvp-product-definition.interview-state.json" />
+		<File Path="knowledge/product/mvp-product-definition.md" />
+	</Folder>
+	<Folder Name="/knowledgebase/vertical-slices/portfolio-foundation/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/.interview-state.json" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/broker-connections.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/cross-service-contracts.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/decisions-and-open-questions.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/onboarding-and-access.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/portfolio-refresh-and-views.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/security-audit-observability.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/service-ownership.md" />
+	</Folder>
 </Solution>

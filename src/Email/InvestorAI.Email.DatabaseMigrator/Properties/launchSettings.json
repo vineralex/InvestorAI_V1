@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "InvestorAI.Email.DatabaseMigrator": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
