@@ -1,0 +1,6 @@
+@InvestorAI.Identity.Service_HostAddress = http://localhost:5013
+
+GET {{InvestorAI.Identity.Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

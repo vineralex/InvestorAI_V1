@@ -3,14 +3,58 @@ type: specification
 title: Portfolio Foundation Implementation and Readiness
 description: Dependency order, verification strategy, and architecture and functional readiness gates for the Portfolio Foundation slice.
 tags: [vertical-slice, implementation-order, testing, readiness, acceptance]
-updated_at: 2026-09-27
+updated_at: 2026-10-05
 status: draft
 ---
 
 # Implementation and readiness
 
-This document defines a future implementation sequence and completion gates. It
-does not authorize implementation as part of the present specification task.
+This document defines the implementation sequence and completion gates.
+Implementation proceeds only within the scope authorized by the project owner.
+
+## Bootstrap checkpoint (2026-10-05)
+
+Milestone 0 is in progress, not complete.
+
+- The owner installed .NET SDK 10.0.401 and pinned it in `global.json` with
+  roll-forward disabled.
+- All 13 planned projects and solution folders exist in `InvestorAI.slnx`.
+  Common properties are in `Directory.Build.props`; current NuGet versions
+  are centralized in `Directory.Packages.props`.
+- Restore and build passed. Two analyzer warnings remain in the template
+  Email Worker logging code.
+- The owner started PostgreSQL `18.6-bookworm` and RabbitMQ
+  `4.3.6-management` with Compose. Both reported healthy; published ports
+  bind to localhost.
+- The owner added containerized pgAdmin as a local database client and
+  verified a connection to `investorai` as `investorai_admin`, running
+  PostgreSQL 18.6.
+
+### RabbitMQ scope at this checkpoint
+
+RabbitMQ does not use PostgreSQL/DbUp SQL migrations. No further RabbitMQ
+topology setup is needed for the current bootstrap step. Exchanges, queues,
+bindings, permissions, and policies will be defined when concrete cross-service
+message contracts are implemented in milestone 1. This checkpoint does not
+claim that future messaging setup or verification is complete.
+
+### Next step and unresolved approach
+
+Discuss and select the simplest reproducible bootstrap of separate PostgreSQL
+migration/runtime roles and initial privileges, then configure the service-owned
+DbUp migrators and verify that runtime credentials cannot perform DDL.
+
+The proposed role-creation SQL was not executed. Neither a separate
+infrastructure folder/script nor a direct database bootstrap command in AdminCli
+was agreed. These remain proposals, not architectural decisions.
+
+The owner performs the setup in Visual Studio; the assistant guides and reviews.
+Discuss concrete changes before making them and obtain the owner's agreement;
+do not automatically implement subsequent steps. XML indentation uses tabs
+with display width four; YAML indentation uses spaces.
+
+Remaining milestone gates include role/migrator setup, runtime DDL-denial
+verification, xUnit/test setup, and repeatable runbook commands.
 
 ## Implementation discipline
 

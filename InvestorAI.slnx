@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path="compose.yaml" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/InvestorAI.Messaging/InvestorAI.Messaging.csproj" Id="70b1a640-6a71-48a4-b4fc-11c16b15b921" />
+    <Project Path="src/BuildingBlocks/InvestorAI.Observability/InvestorAI.Observability.csproj" Id="3331852e-c8ec-4479-85cc-2f3c64668cc2" />
+  </Folder>
+  <Folder Name="/src/Email/">
+    <Project Path="src/Email/InvestorAI.Email.DatabaseMigrator/InvestorAI.Email.DatabaseMigrator.csproj" Id="38496546-e628-4f98-85b6-c471e19b700b" />
+    <Project Path="src/Email/InvestorAI.Email.Worker/InvestorAI.Email.Worker.csproj" Id="fab840d8-971a-4eef-9907-7377f09f42ec" />
+  </Folder>
+  <Folder Name="/src/Identity/">
+    <Project Path="src/Identity/InvestorAI.Identity.DatabaseMigrator/InvestorAI.Identity.DatabaseMigrator.csproj" Id="701e751b-09d9-4637-bda3-876420362aaa" />
+    <Project Path="src/Identity/InvestorAI.Identity.Service/InvestorAI.Identity.Service.csproj" Id="b4a098f1-366c-4638-b3a4-ada260f2556e" />
+  </Folder>
+  <Folder Name="/src/Portfolio/">
+    <Project Path="src/Portfolio/InvestorAI.Portfolio.DatabaseMigrator/InvestorAI.Portfolio.DatabaseMigrator.csproj" Id="f2423121-a5cc-4220-8d1a-ef15f1a7e865" />
+    <Project Path="src/Portfolio/InvestorAI.Portfolio.Providers.Alpaca/InvestorAI.Portfolio.Providers.Alpaca.csproj" Id="06324ea6-f353-4c26-825a-c5c9d80a266e" />
+    <Project Path="src/Portfolio/InvestorAI.Portfolio.Service/InvestorAI.Portfolio.Service.csproj" Id="24593c1c-6235-4e30-9fc9-fd2070b21e57" />
+  </Folder>
+  <Folder Name="/src/Tenant/">
+    <Project Path="src/Tenant/InvestorAI.Tenant.DatabaseMigrator/InvestorAI.Tenant.DatabaseMigrator.csproj" Id="83aa4a4e-716c-40e4-8ff5-bc651d77727e" />
+    <Project Path="src/Tenant/InvestorAI.Tenant.Service/InvestorAI.Tenant.Service.csproj" Id="d8f3d4eb-d962-4e0c-bba2-6d08b9a379c5" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/InvestorAI.AdminCli/InvestorAI.AdminCli.csproj" Id="fbd03fa8-8f3c-4926-8781-e7cf80f26169" />
+    <Project Path="tools/InvestorAI.DevCli/InvestorAI.DevCli.csproj" Id="fb92c6da-40b6-4e3a-86fc-6f3918c8e30f" />
+  </Folder>
+</Solution>
