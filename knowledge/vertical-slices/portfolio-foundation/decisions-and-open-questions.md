@@ -75,6 +75,14 @@ do not constitute a complete implementation plan for the slice.
 | PF-051 | Bootstrap the existing PostgreSQL database and `public` schema using `infra/postgres/bootstrap.ps1` and numbered SQL files. Use two LOGIN roles per service: migration owns its objects; runtime receives specific object grants from service migrations. New runtime roles have no DDL, TEMPORARY, ownership, or BYPASSRLS authority. | Preserves service boundaries without an extra owner role or an AdminCli infrastructure feature. Business logic remains separate from PostgreSQL-specific SQL; multiple database providers are not a current goal. |
 | PF-052 | Infrastructure SQL files are repeatable, each with its own transaction; execute all by number without a journal and stop on the first failure. Existing roles and passwords are neither checked nor repaired; initial grants are reapplied. Read literal passwords from root `.env` and pass them through stdin to containerized psql. Group scripts under `SolutionItems/Postgres/SQL`. | Keeps the local bootstrap simple. Previously committed files survive a later failure; existing-role restrictions are not guaranteed or audited. See [implementation and readiness](implementation-and-readiness.md) for the run command and verification evidence. |
 
+## Tenant migrator implementation decisions (2026-10-06)
+
+| ID | Decision | Rationale or consequence |
+| --- | --- | --- |
+| PF-053 | Across the solution, application code does not construct services or their dependencies with `new`; DI creates them and supplies constructor dependencies. DTOs, value objects, and technical objects are exempt. | See [implementation conventions](../../architecture/implementation-conventions.md). This does not require a Generic Host. |
+| PF-054 | Implement and verify Tenant.DatabaseMigrator before the other three migrators. Use ServiceCollection, Options validation, and layered JSON/Development dotenv/process-environment configuration. Production never reads dotenv; migration username is fixed. | Supports F5 and published/container execution without duplicating local secrets or embedding them into deployment artifacts. |
+| PF-055 | Tenant migrations are embedded RunOnce SQL resources with stable names, ordinal ordering, journal `public.tenant_schema_migrations`, and a DbUp-managed transaction per file. Start with SELECT 1. Exit 0 on success/no changes and 1 on failure; suppress raw diagnostics and stop later scripts. | Proves execution/journaling without business tables. Unlike bootstrap, DbUp journals completed scripts and owns transaction boundaries. See [implementation and readiness](implementation-and-readiness.md). |
+
 ## Superseded or rejected alternatives
 
 | Alternative | Resolution |

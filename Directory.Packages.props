@@ -3,6 +3,12 @@
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageVersion Include="dbup-postgresql" Version="7.0.1" />
+		<PackageVersion Include="Npgsql" Version="10.0.3" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
+		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
 		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
 		<PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
 	</ItemGroup>
