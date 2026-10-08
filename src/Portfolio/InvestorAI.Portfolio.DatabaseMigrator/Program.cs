@@ -1,5 +1,6 @@
+using InvestorAI.Infrastructure.Configuration;
 using InvestorAI.Portfolio.DatabaseMigrator;
-using InvestorAI.DatabaseMigrations;
+using InvestorAI.Infrastructure.DatabaseMigrations;
 using Microsoft.Extensions.DependencyInjection;
 
 internal class Program

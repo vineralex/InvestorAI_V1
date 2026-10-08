@@ -1,6 +1,6 @@
 using DbUp.Engine.Output;
 
-namespace InvestorAI.DatabaseMigrations;
+namespace InvestorAI.Infrastructure.DatabaseMigrations;
 
 // DbUp messages can contain SQL or exception details. The runner reports only
 // known-safe script names, outcomes and SQLSTATE instead of forwarding messages.

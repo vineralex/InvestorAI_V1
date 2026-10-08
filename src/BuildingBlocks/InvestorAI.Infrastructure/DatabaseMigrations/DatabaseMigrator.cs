@@ -4,7 +4,7 @@ using DbUp.Engine.Output;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
-namespace InvestorAI.DatabaseMigrations;
+namespace InvestorAI.Infrastructure.DatabaseMigrations;
 
 public sealed class DatabaseMigrator(IOptions<MigrationSettings> settings, IUpgradeLog upgradeLog, MigrationDefinition definition)
 {

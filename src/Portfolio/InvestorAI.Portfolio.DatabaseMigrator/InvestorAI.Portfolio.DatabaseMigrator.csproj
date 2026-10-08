@@ -3,7 +3,7 @@
 		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 	<ItemGroup>
-		<ProjectReference Include="../../BuildingBlocks/InvestorAI.DatabaseMigrations/InvestorAI.DatabaseMigrations.csproj" />
+		<ProjectReference Include="../../BuildingBlocks/InvestorAI.Infrastructure/InvestorAI.Infrastructure.csproj" />
 		<EmbeddedResource Include="Sql/*.sql" LogicalName="Portfolio.Migrations.%(Filename)%(Extension)" />
 		<None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>

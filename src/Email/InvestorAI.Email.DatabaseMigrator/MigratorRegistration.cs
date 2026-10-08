@@ -1,4 +1,4 @@
-using InvestorAI.DatabaseMigrations;
+using InvestorAI.Infrastructure.DatabaseMigrations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace InvestorAI.Email.DatabaseMigrator;

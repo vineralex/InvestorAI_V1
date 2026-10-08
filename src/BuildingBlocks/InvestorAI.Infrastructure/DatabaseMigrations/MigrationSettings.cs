@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace InvestorAI.DatabaseMigrations;
+namespace InvestorAI.Infrastructure.DatabaseMigrations;
 
 public sealed class MigrationSettings
 {

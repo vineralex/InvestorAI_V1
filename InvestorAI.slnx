@@ -13,7 +13,7 @@
 	</Folder>
 	<Folder Name="/src/" />
 	<Folder Name="/src/BuildingBlocks/">
-		<Project Path="src/BuildingBlocks/InvestorAI.DatabaseMigrations/InvestorAI.DatabaseMigrations.csproj" />
+		<Project Path="src/BuildingBlocks/InvestorAI.Infrastructure/InvestorAI.Infrastructure.csproj" />
 		<Project Path="src/BuildingBlocks/InvestorAI.Messaging/InvestorAI.Messaging.csproj" Id="70b1a640-6a71-48a4-b4fc-11c16b15b921" />
 		<Project Path="src/BuildingBlocks/InvestorAI.Observability/InvestorAI.Observability.csproj" Id="3331852e-c8ec-4479-85cc-2f3c64668cc2" />
 	</Folder>

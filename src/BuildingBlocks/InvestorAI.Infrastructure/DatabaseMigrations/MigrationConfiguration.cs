@@ -1,6 +1,7 @@
+using InvestorAI.Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 
-namespace InvestorAI.DatabaseMigrations;
+namespace InvestorAI.Infrastructure.DatabaseMigrations;
 
 public sealed class MigrationConfiguration(DotEnvReader reader, MigrationDefinition definition)
 {

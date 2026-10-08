@@ -3,7 +3,7 @@ type: policy
 title: Solution Implementation Conventions
 description: Approved dependency injection, object creation, and owner-only PostgreSQL verification rules across the Investor AI solution.
 tags: [implementation, dependency-injection, conventions, verification, postgresql]
-updated_at: 2026-10-07
+updated_at: 2026-10-09
 status: approved
 ---
 
@@ -25,6 +25,22 @@ executables may use the DI container provided by their existing host.
 
 Follow the [implementation discipline](../vertical-slices/portfolio-foundation/implementation-and-readiness.md)
 when deciding whether an abstraction or another project is warranted.
+
+# Shared infrastructure
+
+Use one `InvestorAI.Infrastructure` project under BuildingBlocks for the current
+shared configuration and database migration infrastructure. Organize by folders
+and namespaces: `Configuration` contains DotEnvReader and its exception;
+`DatabaseMigrations` contains migration configuration, settings, metadata, DI
+registration, DbUp execution and safe logging. Migration configuration remains
+with migrations because it maps service-owned migration credentials.
+
+The four migrators reference this project. SQL resources, service definitions,
+appsettings and launch profiles remain in their executable projects. Shared
+infrastructure dependencies may be consumed transitively; separate projects
+are introduced only when a concrete boundary requires them. This replaces the
+earlier standalone `InvestorAI.DatabaseMigrations` project. Existing Messaging
+and Observability projects are outside this reorganization.
 
 # PostgreSQL verification ownership
 

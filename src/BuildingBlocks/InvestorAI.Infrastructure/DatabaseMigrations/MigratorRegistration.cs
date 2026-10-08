@@ -1,8 +1,9 @@
+using InvestorAI.Infrastructure.Configuration;
 using DbUp.Engine.Output;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace InvestorAI.DatabaseMigrations;
+namespace InvestorAI.Infrastructure.DatabaseMigrations;
 
 public static class MigratorRegistration
 {

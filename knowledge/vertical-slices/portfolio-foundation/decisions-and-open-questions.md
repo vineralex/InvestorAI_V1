@@ -3,7 +3,7 @@ type: decision-log
 title: Portfolio Foundation Decisions and Open Questions
 description: Accepted decisions, superseded alternatives, deferred capabilities, and unresolved design questions for the Portfolio Foundation slice.
 tags: [vertical-slice, decisions, open-questions, portfolio]
-updated_at: 2026-10-07
+updated_at: 2026-10-09
 status: draft
 ---
 
@@ -87,7 +87,8 @@ do not constitute a complete implementation plan for the slice.
 
 | ID | Decision | Rationale or consequence |
 | --- | --- | --- |
-| PF-056 | Extract migration configuration, DotEnvReader, MigrationSettings, DbUp execution, safe output, and common DI registration into `InvestorAI.DatabaseMigrations` under BuildingBlocks. Each executable supplies a MigrationDefinition with service name, username, password key, journal, script assembly, and resource prefix; SQL remains service-owned. Tenant is the first consumer; Identity, Email, and Portfolio are next. | Approved additional consumers justify the shared project. Preserve Tenant resource names, journal, transactions, configuration priority, output, and exit codes so previously applied migrations remain recognized. |
+| PF-056 | Extract common migration infrastructure into BuildingBlocks; each executable supplies its own MigrationDefinition and embedded SQL. All four migrators now consume the shared code. The original `InvestorAI.DatabaseMigrations` project placement is superseded by PF-057. | Preserve resource names, journals, transactions, configuration priority, output, and exit codes so previously applied migrations remain recognized. |
+| PF-057 | Use one `InvestorAI.Infrastructure` project for current shared configuration and migration dependencies, organized into Configuration and DatabaseMigrations folders/namespaces. DotEnvReader belongs to Configuration; migration-specific configuration stays with migrations. | Avoid premature project fragmentation. Service SQL, metadata registrations, appsettings and F5 profiles remain service-owned. Existing Messaging and Observability projects are outside this change. |
 
 ## Superseded or rejected alternatives
 

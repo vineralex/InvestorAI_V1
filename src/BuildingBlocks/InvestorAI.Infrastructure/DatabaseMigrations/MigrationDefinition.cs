@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace InvestorAI.DatabaseMigrations;
+namespace InvestorAI.Infrastructure.DatabaseMigrations;
 
 // Service-owned metadata. No credentials or SQL scripts live in this library.
 public sealed record MigrationDefinition(

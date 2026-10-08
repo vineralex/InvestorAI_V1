@@ -3,7 +3,7 @@ type: specification
 title: Portfolio Foundation Implementation and Readiness
 description: Dependency order, verification strategy, and architecture and functional readiness gates for the Portfolio Foundation slice.
 tags: [vertical-slice, implementation-order, testing, readiness, acceptance]
-updated_at: 2026-10-07
+updated_at: 2026-10-09
 status: draft
 ---
 
@@ -160,7 +160,7 @@ ORDER BY rolname;
 
 The Tenant migrator implements a one-shot console process with ServiceCollection
 DI and no Generic Host. Its common infrastructure is now in
-`src/BuildingBlocks/InvestorAI.DatabaseMigrations`. Application services receive constructor dependencies;
+`src/BuildingBlocks/InvestorAI.Infrastructure`. Application services receive constructor dependencies;
 the solution-wide rule is in
 [implementation conventions](../../architecture/implementation-conventions.md).
 Tenant was implemented first; the other three migrators now use the same
@@ -270,8 +270,9 @@ owner's database.
 
 The reusable configuration, dotenv reading, connection settings, DbUp execution,
 safe output, and common DI registration are extracted into
-`InvestorAI.DatabaseMigrations` under BuildingBlocks. Tenant references this
-project. Identity, Email, and Portfolio now reference the shared project as well.
+the shared BuildingBlocks library, initially named `InvestorAI.DatabaseMigrations`
+and renamed to `InvestorAI.Infrastructure` on 2026-10-09. All four migrators
+reference the Infrastructure project.
 
 `MigrationDefinition` carries service-owned metadata: service name, migration
 username, password environment key, journal schema/table, SQL assembly, and
@@ -340,6 +341,26 @@ This supersedes earlier permission to run assistant-owned database fixtures for
 subsequent work; historical results above remain historical evidence.
 
 ### Next step
+
+On 2026-10-09, the owner approved replacing the shared DatabaseMigrations
+project with `InvestorAI.Infrastructure`, organized into Configuration and
+DatabaseMigrations folders/namespaces. All four executable references were
+updated. DotEnvReader is in Configuration; migration-specific settings and
+configuration remain in DatabaseMigrations. Package versions, service SQL
+resource names, journals and migration behavior are preserved. PostgreSQL
+execution after this reorganization remains owner-only and is not claimed here.
+Solution restore/build passed after the move: all 14 projects, zero errors,
+and the same six existing analyzer warnings (Email Worker and Program classes).
+The obsolete project folder and its bin/obj were removed, together with old
+DatabaseMigrations DLL/PDB copies in the four migrator outputs. A full solution
+rebuild passed during the 2026-10-09 audit. All solution entries resolve to
+existing files. Reflection confirmed exactly the original 001 SQL resource in
+each executable. All four executables rejected an intentionally unknown process
+environment with exit code 1 and the expected safe startup message, exercising
+DI startup without reading dotenv or connecting to PostgreSQL. Source review
+confirmed the four definitions retain their own assembly, role, password key,
+journal and resource prefix. No PostgreSQL verification was performed in this
+audit; historical owner database evidence above predates the rename.
 
 Confirm normal Tenant F5 execution after removal of the temporary scripts.
 Confirm Email's journal row count if it has not yet been checked.
