@@ -38,4 +38,3 @@ Agent Runtime
 
 External calls additionally follow [outbound identity and
 authorization](outbound-identity-and-authorization.md).
-

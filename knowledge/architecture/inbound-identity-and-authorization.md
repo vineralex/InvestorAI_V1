@@ -51,4 +51,4 @@ Tenant scoping is also enforced at the data boundary; see
 [multi-tenant data isolation](multi-tenant-data-isolation.md).
 
 The MVP roles and their capabilities are defined in
-[MVP architecture](mvp-architecture.md).
+[MVP architecture](mvp-architecture/index.md).

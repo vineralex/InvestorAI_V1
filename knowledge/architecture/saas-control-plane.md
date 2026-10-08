@@ -19,4 +19,4 @@ to establish the initial owner. Identity Service creates a pending owner, owns
 the one-time activation code, and requests delivery from Email Service.
 
 Self-service signup, invitations, and the broader control plane are deferred.
-See [MVP architecture](mvp-architecture.md).
+See [MVP architecture](mvp-architecture/index.md).

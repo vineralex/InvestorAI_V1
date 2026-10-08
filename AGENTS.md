@@ -15,6 +15,10 @@ For every repository task:
 Maintain the `knowledge/` directory as the Open Knowledge Format (OKF) bundle
 defined in [knowledge/index.md](knowledge/index.md).
 
+Keep indexes short and topic files focused. Navigate through relevant indexes
+to the needed files; do not load the whole bundle. Separate historical evidence
+from current status and plans. Follow cross-links only when the task needs them.
+
 ## Repository language
 
 Use English for all content added or edited in this repository, including

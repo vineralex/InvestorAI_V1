@@ -32,4 +32,4 @@ connections do not retain another tenant's context.
 The MVP uses one database and one schema with strict logical table ownership,
 separate service migrations, and separate restricted runtime roles. Services
 must not query or join another service's tables. See
-[MVP architecture](mvp-architecture.md).
+[MVP architecture](mvp-architecture/index.md).

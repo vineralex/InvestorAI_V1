@@ -17,7 +17,7 @@ These are intentions, not approved architecture. They require analysis before
 implementation and must not be used to infer missing decisions.
 
 The first architecture pass resolving these intentions is recorded in
-[MVP architecture](mvp-architecture.md). That approved document takes
+[MVP architecture](mvp-architecture/index.md). That approved document takes
 precedence where an earlier intention or supporting note conflicts with it.
 
 The intended supporting concerns are documented separately:

@@ -11,7 +11,7 @@ status: intention
 
 This document preserves a future research direction. It is **not approved
 architecture**, is not part of the Portfolio Foundation slice, and does not
-change the approved MVP boundaries in [MVP architecture](mvp-architecture.md).
+change the approved MVP boundaries in [MVP architecture](mvp-architecture/index.md).
 
 ## Hypothesis
 
@@ -75,7 +75,7 @@ action. A future acceptance policy must also consider at least:
 
 The Decision Layer must not authorize access, weaken tenant isolation, invent
 financial facts, or place, modify, or cancel orders. These constraints follow
-the approved human-control boundary in [MVP architecture](mvp-architecture.md).
+the approved human-control boundary in [MVP architecture](mvp-architecture/index.md).
 
 ## Evidence and cautions
 

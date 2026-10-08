@@ -26,4 +26,3 @@ performs its task but does not own cost-calculation logic.
 
 The identifiers used here align with the context described in [execution
 observability](execution-observability.md).
-

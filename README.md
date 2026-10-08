@@ -16,5 +16,5 @@ restore/build/test commands, container startup, database migrations, and shutdow
 ## Architecture and implementation status
 
 See the [knowledge index](knowledge/index.md) for architecture and decisions,
-and [implementation and readiness](knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness.md)
+and [implementation and readiness](knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/index.md)
 for verification evidence and outstanding milestone gates. The local setup does not establish completion of Portfolio Foundation or the product MVP.

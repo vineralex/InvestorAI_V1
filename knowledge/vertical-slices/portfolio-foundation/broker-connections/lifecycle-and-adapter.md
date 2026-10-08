@@ -1,13 +1,13 @@
 ---
 type: specification
-title: Portfolio Foundation Broker Connections
-description: Broker adapter boundary, connection and account lifecycle, secure credential handling, and automatic initial import.
+title: Broker lifecycle and adapter
+description: Details for broker lifecycle and adapter.
 tags: [vertical-slice, portfolio, broker, alpaca, credentials, accounts]
-updated_at: 2026-09-23
+updated_at: 2026-10-09
 status: draft
 ---
 
-# Broker connections
+# Broker lifecycle and adapter
 
 ## Domain distinctions
 
@@ -98,53 +98,7 @@ slice. To regain access after `Disconnected`, the Owner creates a new connection
   associated accounts `included = false`.
 
 Position data status is independent from inclusion and is defined in
-[Portfolio refresh and views](portfolio-refresh-and-views.md).
+[Portfolio refresh and views](../portfolio-refresh-and-views/index.md).
 
-## Credential handling
 
-Broker credentials are owned only by Portfolio Service and use envelope
-encryption:
-
-1. credentials are encrypted with a data-encryption key;
-2. that data key is wrapped by a versioned key-encryption key;
-3. PostgreSQL stores ciphertext, wrapped data key, and key metadata, never the
-   unencrypted key-encryption key;
-4. messages carry `connectionId`, not credentials;
-5. the worker retrieves and decrypts credentials immediately before an adapter
-   call;
-6. plaintext exists only in memory for the shortest practical duration;
-7. key unavailability prevents the broker call and produces safe stable errors;
-8. rotation supports new active key versions and gradual rewrapping.
-
-Local development uses a test key supplied through `.env`. A deployed environment
-must use an external centralized key manager through a replaceable key-provider
-boundary. The specific KMS/Vault product and cryptographic algorithms remain
-open infrastructure and low-level security decisions.
-
-## Errors and user-facing messages
-
-Portfolio Service owns stable namespaced connection and adapter error codes.
-An error separates:
-
-- stable code;
-- safe structured parameters;
-- retryability/action requirement;
-- user-friendly text resolved through the service message catalogue;
-- protected diagnostics that are never returned to the caller.
-
-The catalogue is a service-local component following a common error envelope,
-not a central Error Dictionary Service. Full localization and administrative
-message editing are deferred, but the separation is required in the slice.
-
-## Broker connection invariants
-
-- Credentials never appear in a URL, message, log, trace attribute, audit detail,
-  exception response, or snapshot.
-- Validation success is not account inclusion.
-- Account inclusion is not proof that a usable snapshot exists.
-- A connection operation is idempotent under message redelivery.
-- Duplicate external accounts must not silently create duplicate included
-  sources; the precise provider-identity constraint is deferred to contract
-  design.
-- Portfolio Service never invokes a broker write/trading operation.
-
+[Back to index](index.md)

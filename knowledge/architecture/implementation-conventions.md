@@ -23,7 +23,7 @@ The rule does not require a Generic Host or a shared dependency-injection
 framework. The Tenant one-shot migrator uses `ServiceCollection`; service
 executables may use the DI container provided by their existing host.
 
-Follow the [implementation discipline](../vertical-slices/portfolio-foundation/implementation-and-readiness.md)
+Follow the [implementation discipline](../vertical-slices/portfolio-foundation/implementation-and-readiness/index.md)
 when deciding whether an abstraction or another project is warranted.
 
 # Shared infrastructure

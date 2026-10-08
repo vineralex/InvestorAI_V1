@@ -17,20 +17,17 @@ editing knowledge:
   between related concepts;
 - preserve unknown OKF frontmatter fields when editing existing documents.
 
-Read one matching concept and follow its links only as needed. Documents marked
+Follow the relevant index branch, then read only the leaf documents needed.
+Do not recursively load every linked document or read the whole bundle.
+Keep indexes short and move independent topics and historical evidence into
+separate files. Prefer one focused topic per leaf; split by meaning, not a
+fixed line count. Cross-links supplement the tree and are followed only when
+the current task requires them. Human setup instructions belong in README/docs.
+
+Documents marked
 as `status: intention` describe direction to investigate, not approved
 architecture.
 
-- Product direction and unresolved architecture: [architectural intentions](architecture/intentions.md)
-- Approved product value and scope of the MVP: [MVP product definition](product/mvp-product-definition.md)
-- Approved MVP boundaries and decisions: [MVP architecture](architecture/mvp-architecture.md)
-- User identity, JWT, RBAC, and ABAC: [inbound identity and authorization](architecture/inbound-identity-and-authorization.md)
-- Tenant-owned data and isolation: [multi-tenant data isolation](architecture/multi-tenant-data-isolation.md)
-- Agent Runtime, Gateway, Memory, and domain boundaries: [agent execution boundaries](architecture/agent-execution-boundaries.md)
-- LLM token usage and cost facts: [LLM usage accounting](architecture/llm-usage-accounting.md)
-- Logs, metrics, and traces: [execution observability](architecture/execution-observability.md)
-- Tenant onboarding and lifecycle: [SaaS Control Plane](architecture/saas-control-plane.md)
-- External credentials and delegated actions: [outbound identity and authorization](architecture/outbound-identity-and-authorization.md)
-- Future typed-decision routing: [Laya and Jev Decision Layer cascade](architecture/decision-layer-laya-jev-cascade-intention.md)
-- First vertical slice: [Portfolio Foundation](vertical-slices/portfolio-foundation/index.md)
-- Solution-wide DI, object creation, and owner-only PostgreSQL verification: [implementation conventions](architecture/implementation-conventions.md)
+- Product value, scope, and success: [Product](product/index.md)
+- Architecture, identity, isolation, and implementation conventions: [Architecture](architecture/index.md)
+- Current delivery plan, slice contracts, and verification evidence: [Vertical slices](vertical-slices/index.md)

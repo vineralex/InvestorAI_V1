@@ -54,27 +54,100 @@
 		<File Path="knowledge/architecture/execution-observability.md" />
 		<File Path="knowledge/architecture/implementation-conventions.md" />
 		<File Path="knowledge/architecture/inbound-identity-and-authorization.md" />
+		<File Path="knowledge/architecture/index.md" />
 		<File Path="knowledge/architecture/intentions.md" />
 		<File Path="knowledge/architecture/llm-usage-accounting.md" />
 		<File Path="knowledge/architecture/multi-tenant-data-isolation.md" />
-		<File Path="knowledge/architecture/mvp-architecture.md" />
 		<File Path="knowledge/architecture/outbound-identity-and-authorization.md" />
 		<File Path="knowledge/architecture/saas-control-plane.md" />
 	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/architecture/mvp-architecture/">
+		<File Path="knowledge/architecture/mvp-architecture/boundaries-and-flows.md" />
+		<File Path="knowledge/architecture/mvp-architecture/index.md" />
+		<File Path="knowledge/architecture/mvp-architecture/slices-and-open-questions.md" />
+	</Folder>
 	<Folder Name="/SolutionItems/knowledgebase/product/">
 		<File Path="knowledge/product/.mvp-product-definition.interview-state.json" />
-		<File Path="knowledge/product/mvp-product-definition.md" />
+		<File Path="knowledge/product/index.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/product/mvp-product-definition/">
+		<File Path="knowledge/product/mvp-product-definition/decisions-and-order.md" />
+		<File Path="knowledge/product/mvp-product-definition/index.md" />
+		<File Path="knowledge/product/mvp-product-definition/operations-and-delivery.md" />
+		<File Path="knowledge/product/mvp-product-definition/scope-and-success.md" />
+		<File Path="knowledge/product/mvp-product-definition/value-and-users.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/">
+		<File Path="knowledge/vertical-slices/index.md" />
 	</Folder>
 	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/">
 		<File Path="knowledge/vertical-slices/portfolio-foundation/.interview-state.json" />
-		<File Path="knowledge/vertical-slices/portfolio-foundation/broker-connections.md" />
-		<File Path="knowledge/vertical-slices/portfolio-foundation/cross-service-contracts.md" />
-		<File Path="knowledge/vertical-slices/portfolio-foundation/decisions-and-open-questions.md" />
-		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness.md" />
 		<File Path="knowledge/vertical-slices/portfolio-foundation/index.md" />
-		<File Path="knowledge/vertical-slices/portfolio-foundation/onboarding-and-access.md" />
-		<File Path="knowledge/vertical-slices/portfolio-foundation/portfolio-refresh-and-views.md" />
-		<File Path="knowledge/vertical-slices/portfolio-foundation/security-audit-observability.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/invariants-and-dependencies.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/scope-and-outcome.md" />
 		<File Path="knowledge/vertical-slices/portfolio-foundation/service-ownership.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/system-context.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/broker-connections/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/broker-connections/credentials-and-invariants.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/broker-connections/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/broker-connections/lifecycle-and-adapter.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/cross-service-contracts/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/cross-service-contracts/delivery-and-recovery.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/cross-service-contracts/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/cross-service-contracts/operations-and-messages.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/cross-service-contracts/sequences.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/decisions-and-open-questions/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/decisions-and-open-questions/implementation-decisions.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/decisions-and-open-questions/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/decisions-and-open-questions/open-and-deferred.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/decisions-and-open-questions/slice-decisions.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/implementation-and-readiness/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/discipline.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/readiness.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/verification.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/environment.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/identity-email-and-portfolio-migrators-2026-10-07.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/infrastructure-tests-and-closure.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/postgresql-role-bootstrap-2026-10-06.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/rabbitmq-scope-at-this-checkpoint.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/shared-migration-infrastructure-2026-10-07.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/bootstrap/tenant-dbup-migrator-2026-10-06.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/1-repository-bootstrap.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/10-portfolio-read-views.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/11-recovery-observability-and-end-to-end-proof.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/2-contract-and-isolation-foundation.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/3-identity-permissions-and-tokens.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/4-tenant-provisioning-and-activation.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/5-email-delivery.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/6-portfolio-connection-security.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/7-broker-adapter-and-validation.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/8-account-selection-and-initial-import.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/9-refresh-orchestration-and-snapshots.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/implementation-and-readiness/plan/index.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/onboarding-and-access/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/onboarding-and-access/authentication-and-permissions.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/onboarding-and-access/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/onboarding-and-access/provisioning-and-activation.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/portfolio-refresh-and-views/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/portfolio-refresh-and-views/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/portfolio-refresh-and-views/portfolio-views.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/portfolio-refresh-and-views/refresh-and-snapshots.md" />
+	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/security-audit-observability/">
+		<File Path="knowledge/vertical-slices/portfolio-foundation/security-audit-observability/audit-and-observability.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/security-audit-observability/index.md" />
+		<File Path="knowledge/vertical-slices/portfolio-foundation/security-audit-observability/security-and-errors.md" />
 	</Folder>
 </Solution>

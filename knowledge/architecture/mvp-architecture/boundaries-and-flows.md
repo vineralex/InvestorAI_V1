@@ -1,19 +1,13 @@
 ---
 type: concept
-title: MVP Architecture
-description: Service boundaries, analysis flows, delivery, and implementation slices for the Investor AI product MVP.
+title: MVP boundaries and flows
+description: Details for mvp boundaries and flows.
 tags: [architecture, mvp, multitenancy, portfolio, analysis, scheduling, email]
-updated_at: 2026-09-22
+updated_at: 2026-10-09
 status: approved
 ---
 
-# MVP architecture
-
-This architecture implements the [MVP product definition](../product/mvp-product-definition.md).
-It records system boundaries and execution flow, not service contracts. The
-previously approved portfolio-retrieval slice remains the first implementation
-milestone; the product MVP also requires two independent analyses, scheduled
-execution, persistent results, and email delivery.
+# MVP boundaries and flows
 
 ## Decisions
 
@@ -32,7 +26,7 @@ Services are independently deployable processes. RabbitMQ carries cross-service
 requests and facts. PostgreSQL remains one database and schema with strict
 service ownership: no service reads or writes another service's data directly.
 Tenant-owned data is protected by application authorization and PostgreSQL
-Row-Level Security, as specified in [tenant isolation](multi-tenant-data-isolation.md).
+Row-Level Security, as specified in [tenant isolation](../multi-tenant-data-isolation.md).
 Docker Compose on one machine remains the initial deployment topology.
 
 The approved infrastructure invariants remain in force: a user has one active
@@ -74,7 +68,7 @@ causation context. API boundaries validate user JWTs. Async commands use
 narrowly scoped internal JWTs issued by Identity Service; user bearer tokens
 never enter RabbitMQ. Delivery is at least once, so run initiation, result
 publication, and email consumption must be idempotent and use outbox/inbox
-patterns. These rules extend the [approved identity boundary](inbound-identity-and-authorization.md)
+patterns. These rules extend the [approved identity boundary](../inbound-identity-and-authorization.md)
 and existing portfolio-refresh choreography.
 
 ### Portfolio attention analysis
@@ -120,37 +114,5 @@ Existing domain rules, broker code, and tests require review before reuse; the
 old database schema, Worker boundaries, and Quartz setup are not adopted.
 The existing email implementation may be adapted to Email Service.
 
-## Implementation slices
 
-1. **Portfolio foundation.** Provision tenant and owner, activate with a
-   one-time email code and password setup through the API, sign in, connect
-   Alpaca paper accounts, import positions asynchronously,
-   expose the consolidated portfolio, and support manual tenant refresh. This
-   is the previously approved first slice, not the complete product MVP.
-2. **Portfolio attention end to end.** Add Markdown strategy, controlled market
-   facts, Analysis Service with its initial Decision Layer, persisted runs and
-   results, API initiation and retrieval, scheduled initiation, and email for
-   every completed attention analysis, including empty outcomes.
-3. **Opportunities end to end.** Add tenant watchlist and candidate facts; use
-   the same initiation, result, Decision Layer, scheduling, and email boundaries
-   for independent watchlist ranking.
-4. **MVP verification.** Demonstrate both API and scheduled paths end to end,
-   tenant isolation, idempotent retries, data-freshness disclosure, result
-   retrieval, and email delivery with observable failure states.
-
-## Open questions
-
-- Strategy interpretation, portfolio-risk signals, thresholds, opportunity
-  criteria, and ranking semantics.
-- Market-data provider and refresh/freshness policy, including minimum usable
-  coverage for a completed analysis.
-- Schedule cadence and tenant configuration for each operation and refresh.
-- Detailed Decision Layer contracts, result shapes, and any future Jev or
-  equivalent integration.
-- Email recipients and escalation after persistent delivery failure.
-
-These questions do not alter the approved product boundary. The MVP excludes
-automatic trading, a Web UI, whole-market scanning, pairwise replacement
-comparison, mandatory specialized ML, billing, realtime broker synchronization,
-database-per-service, and Kubernetes. Agent Runtime, Agent Gateway, and Memory
-Service remain [architectural intentions](intentions.md), not MVP dependencies.
+[Back to index](index.md)
