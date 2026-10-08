@@ -137,8 +137,8 @@ design. They are not permission to change the decisions above.
    attempts, retry/backoff, timeouts, concurrency, freshness, recent-refresh
    reuse, leases, and retention.
 12. Snapshot and operation-history retention, pruning, and archival policies.
-13. Full error-code catalogue, safe parameters, initial language, and fallback
-    wording.
+13. Full error-code catalogue, safe parameters, and fallback wording. Messages
+    use English under the repository language rule in [AGENTS.md](../../../AGENTS.md).
 14. Real SMTP provider/configuration, templates, and operator handling after
     terminal delivery failure. Mailpit is selected only as the local/test SMTP
     sink for the activation milestone.
@@ -150,8 +150,9 @@ design. They are not permission to change the decisions above.
 18. Whether a Portfolio-completed fact is emitted in the first slice when no
     current consumer requires it, or introduced with the first consumer.
 19. Final policy and library choice for mocks and hand-written test doubles.
-20. Exact PostgreSQL, RabbitMQ, Mailpit, and other container patch tags selected
-    when each relevant runbook milestone is authored.
+20. Mailpit and future container patch tags when their milestones are authored.
+    Current Compose pins are PostgreSQL `18.6-bookworm`, RabbitMQ
+    `4.3.6-management`, and pgAdmin `9.18`; these versions are already selected.
 21. CI provider workflow details, triggers, caching, and the point at which the
     meaningful test suite makes CI a required delivery gate.
 

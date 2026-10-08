@@ -1,9 +1,13 @@
 <Solution>
 	<Folder Name="/SolutionItems/">
+		<File Path="README.md" />
 		<File Path="compose.yaml" />
 		<File Path="Directory.Build.props" />
 		<File Path="Directory.Packages.props" />
 		<File Path=".env.example" />
+	</Folder>
+	<Folder Name="/SolutionItems/docs/">
+		<File Path="docs/local-development.md" />
 	</Folder>
 	<Folder Name="/SolutionItems/Postgres/">
 		<File Path="infra/postgres/bootstrap.ps1" />
@@ -41,10 +45,10 @@
 	<Folder Name="/tests/">
 		<Project Path="tests/InvestorAI.Infrastructure.Tests/InvestorAI.Infrastructure.Tests.csproj" />
 	</Folder>
-	<Folder Name="/knowledgebase/">
+	<Folder Name="/SolutionItems/knowledgebase/">
 		<File Path="knowledge/index.md" />
 	</Folder>
-	<Folder Name="/knowledgebase/architecture/">
+	<Folder Name="/SolutionItems/knowledgebase/architecture/">
 		<File Path="knowledge/architecture/agent-execution-boundaries.md" />
 		<File Path="knowledge/architecture/decision-layer-laya-jev-cascade-intention.md" />
 		<File Path="knowledge/architecture/execution-observability.md" />
@@ -57,11 +61,11 @@
 		<File Path="knowledge/architecture/outbound-identity-and-authorization.md" />
 		<File Path="knowledge/architecture/saas-control-plane.md" />
 	</Folder>
-	<Folder Name="/knowledgebase/product/">
+	<Folder Name="/SolutionItems/knowledgebase/product/">
 		<File Path="knowledge/product/.mvp-product-definition.interview-state.json" />
 		<File Path="knowledge/product/mvp-product-definition.md" />
 	</Folder>
-	<Folder Name="/knowledgebase/vertical-slices/portfolio-foundation/">
+	<Folder Name="/SolutionItems/knowledgebase/vertical-slices/portfolio-foundation/">
 		<File Path="knowledge/vertical-slices/portfolio-foundation/.interview-state.json" />
 		<File Path="knowledge/vertical-slices/portfolio-foundation/broker-connections.md" />
 		<File Path="knowledge/vertical-slices/portfolio-foundation/cross-service-contracts.md" />

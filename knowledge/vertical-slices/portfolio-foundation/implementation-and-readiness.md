@@ -14,7 +14,8 @@ Implementation proceeds only within the scope authorized by the project owner.
 
 ## Bootstrap checkpoint (2026-10-05)
 
-Milestone 0 is in progress, not complete.
+Milestone 1 is complete as of 2026-10-09. Earlier checkpoints below describe
+the evidence available at their respective dates.
 
 - The owner installed .NET SDK 10.0.401 and pinned it in `global.json` with
   roll-forward disabled.
@@ -35,7 +36,7 @@ Milestone 0 is in progress, not complete.
 RabbitMQ does not use PostgreSQL/DbUp SQL migrations. No further RabbitMQ
 topology setup is needed for the current bootstrap step. Exchanges, queues,
 bindings, permissions, and policies will be defined when concrete cross-service
-message contracts are implemented in milestone 1. This checkpoint does not
+message contracts are implemented in milestone 2. This checkpoint does not
 claim that future messaging setup or verification is complete.
 
 ### PostgreSQL role bootstrap (2026-10-06)
@@ -112,7 +113,7 @@ On 2026-10-06, an isolated PostgreSQL `18.6-bookworm` Compose fixture passed:
 The temporary test Compose project was removed after verification. The isolated
 checks did not change the owner's working database, `.env`, or working volumes.
 This proves bootstrap behavior, not application RLS, service DbUp setup, or
-complete milestone 0 readiness.
+complete milestone 1 readiness.
 
 #### Owner environment verification (2026-10-06)
 
@@ -164,7 +165,7 @@ DI and no Generic Host. Its common infrastructure is now in
 the solution-wide rule is in
 [implementation conventions](../../architecture/implementation-conventions.md).
 Tenant was implemented first; the other three migrators now use the same
-shared infrastructure, with owner database verification pending as described below.
+shared infrastructure. Owner database verification is recorded below.
 
 Configuration priority is `appsettings.json`, then root `.env` in Development
 only, then process environment. `Database__Host`, `Database__Port`,
@@ -246,7 +247,7 @@ The failing and empty-script builds existed only in a temporary test fixture.
 The dedicated test container was removed. The owner's `.env`, database and
 working volumes were not changed. The fixture verifies the corresponding
 Development path separately from the owner's Visual Studio verification below.
-Milestone 0 remains incomplete.
+Milestone 1 remains incomplete.
 
 #### Owner Tenant verification (2026-10-07)
 
@@ -385,9 +386,20 @@ dotnet test --solution InvestorAI.slnx
 ```
 
 In Visual Studio, open Test Explorer and run all tests. Service-specific test
-projects will be added when they have concrete behavior to verify. Remaining
-milestone runbook commands and runtime permissions on actual service objects
-are still outstanding; milestone 0 is not complete.
+projects will be added when they have concrete behavior to verify.
+
+The [local development guide](../../../docs/local-development.md), linked from
+the root [README](../../../README.md), collects the human-facing local setup
+commands: configuration, restore/build/test, Compose startup and health status,
+role bootstrap, all four migrators, journal inspection, and shutdown preserving
+volumes. These commands were reviewed against repository configuration; this
+documentation change does not claim a new owner-run environment verification.
+On 2026-10-09, the owner confirmed that all four runtime roles reject CREATE
+TABLE in the public schema using administrator-run SET LOCAL ROLE checks, with
+ROLLBACK after each attempt. Together with the recorded build, test, bootstrap,
+migrator, and infrastructure evidence, this closes milestone 1. Runtime DML
+grants on future business objects remain subject to verification when those
+objects are introduced; they are not established by this DDL check.
 
 The owner performs the setup in Visual Studio; the assistant guides and reviews.
 Discuss concrete changes before making them and obtain the owner's agreement;
@@ -396,9 +408,8 @@ assistant implementation and isolated verification of this role bootstrap.
 XML indentation uses tabs
 with display width four; YAML indentation uses spaces.
 
-Role bootstrap is implemented and verified. Remaining milestone gates include
-runtime permission verification on actual service objects and remaining
-repeatable runbook commands.
+Role bootstrap and runtime DDL denial are verified. Milestone 1 is complete.
+Repeatable local setup commands are documented in the local development guide.
 
 ## Implementation discipline
 
@@ -417,17 +428,17 @@ security contracts recorded in
 
 ```mermaid
 flowchart TD
-    Z[0. Repository bootstrap]
-    A[1. Contract and isolation foundation]
-    B[2. Identity permissions and tokens]
-    C[3. Tenant provisioning and activation]
-    D[4. Email delivery]
-    E[5. Portfolio connection security]
-    F[6. Broker adapter and validation]
-    G[7. Account selection and initial import]
-    H[8. Refresh orchestration and snapshots]
-    I[9. Portfolio read views]
-    J[10. Recovery, observability, and end-to-end proof]
+    Z[1. Repository bootstrap]
+    A[2. Contract and isolation foundation]
+    B[3. Identity permissions and tokens]
+    C[4. Tenant provisioning and activation]
+    D[5. Email delivery]
+    E[6. Portfolio connection security]
+    F[7. Broker adapter and validation]
+    G[8. Account selection and initial import]
+    H[9. Refresh orchestration and snapshots]
+    I[10. Portfolio read views]
+    J[11. Recovery, observability, and end-to-end proof]
 
     Z --> A
     A --> B
@@ -445,13 +456,13 @@ flowchart TD
     A --> J
 ```
 
-### 0. Repository bootstrap
+### 1. Repository bootstrap
 
 The project owner executes this milestone from a step-by-step runbook. It
 creates a reproducible repository foundation without implementing business
 behavior or pretending that unresolved contracts are settled.
 
-Initial solution shape:
+Current solution shape:
 
 ```text
 src/
@@ -469,11 +480,14 @@ src/
     InvestorAI.Portfolio.DatabaseMigrator
     InvestorAI.Portfolio.Providers.Alpaca
   BuildingBlocks/
+    InvestorAI.Infrastructure
     InvestorAI.Observability
     InvestorAI.Messaging
 tools/
   InvestorAI.AdminCli
   InvestorAI.DevCli
+tests/
+  InvestorAI.Infrastructure.Tests
 ```
 
 Bootstrap work:
@@ -482,13 +496,17 @@ Bootstrap work:
 - centralize common SDK project properties in `Directory.Build.props` and NuGet
   versions in `Directory.Packages.props`;
 - enable nullable reference types and the agreed moderate analyzer policy;
-- create only the projects shown above, without separate Domain, Application,
-  or generic Infrastructure projects;
-- prepare one-shot service-owned migrators using Dapper, Npgsql, DbUp, embedded
+- keep service code in the executable projects without separate Domain,
+  Application, or per-service Infrastructure projects; shared configuration
+  and migration infrastructure lives in the approved InvestorAI.Infrastructure
+  building block;
+- prepare one-shot service-owned migrators using Npgsql, DbUp, embedded
   SQL resources, separate journals, and distinct migration/runtime role
-  configuration;
-- add Docker Compose services for PostgreSQL 18 and RabbitMQ 4.3 only, using
-  supported pinned patch tags and localhost-safe port exposure;
+  configuration; Dapper is selected for future application persistence and
+  is not required by the current migrators;
+- provide Docker Compose services for PostgreSQL 18 and RabbitMQ 4.3, plus
+  pgAdmin as the owner's local database client, using pinned patch tags and
+  localhost-safe port exposure;
 - establish xUnit as the test framework and reserve Testcontainers for tests
   that make PostgreSQL or RabbitMQ correctness claims;
 - document repeatable restore, build, test, Compose start, health-check, and
@@ -505,7 +523,7 @@ current test command successfully, start healthy PostgreSQL and RabbitMQ
 containers, and demonstrate that runtime service credentials cannot perform
 DDL. No source or runtime dependency points to `D:\Projects\InvestorAi`.
 
-### 1. Contract and isolation foundation
+### 2. Contract and isolation foundation
 
 - establish service projects/process boundaries and independent database roles;
 - establish tenant context propagation and RLS test harness;
@@ -517,7 +535,7 @@ Exit gate: two representative services can commit an outbox message, consume it
 idempotently under tenant isolation, and correlate logs/traces without sharing
 tables or user tokens.
 
-### 2. Identity permissions and tokens
+### 3. Identity permissions and tokens
 
 - implement fixed role-to-permission bundles;
 - issue and locally validate short-lived access JWTs;
@@ -528,7 +546,7 @@ tables or user tokens.
 Exit gate: permission and ABAC tests cover allowed, denied, expired, wrong
 tenant, wrong audience, changed membership, and refresh-token revocation cases.
 
-### 3. Tenant provisioning and activation
+### 4. Tenant provisioning and activation
 
 - implement protected Admin CLI to Tenant Service acceptance;
 - persist tenant/provisioning/audit/outbox atomically;
@@ -541,7 +559,7 @@ Exit gate: duplicate/out-of-order messages cannot create duplicate tenants,
 memberships, Owners, or active codes, and a failed remote step is observable and
 recoverable.
 
-### 4. Email delivery
+### 5. Email delivery
 
 - implement encrypted activation payload contract;
 - implement Email-owned composition, SMTP delivery state, retries, and terminal
@@ -552,7 +570,7 @@ recoverable.
 Exit gate: activation email can be sent through the configured local/test SMTP
 path without exposing the code in logs, audit, or stored plaintext history.
 
-### 5. Portfolio connection security
+### 6. Portfolio connection security
 
 - implement Portfolio ownership, RLS, permissions, local audit, and error
   catalogue;
@@ -564,7 +582,7 @@ path without exposing the code in logs, audit, or stored plaintext history.
 Exit gate: database/message/log/trace inspection reveals no plaintext broker
 credential; unavailable keys fail closed.
 
-### 6. Broker adapter and validation
+### 7. Broker adapter and validation
 
 - define neutral validation/account/position/error contract;
 - adapt the relevant prior Alpaca normalization behavior only after review;
@@ -574,7 +592,7 @@ credential; unavailable keys fail closed.
 Exit gate: valid, rejected, temporarily unavailable, repeated, and malformed
 provider outcomes produce the correct connection states and stable errors.
 
-### 7. Account selection and initial import
+### 8. Account selection and initial import
 
 - implement explicit `included` selection;
 - automatically create initial-import work on inclusion;
@@ -585,7 +603,7 @@ provider outcomes produce the correct connection states and stable errors.
 Exit gate: selecting a real Alpaca paper account eventually makes its real
 positions visible, and selecting an empty account yields a valid empty snapshot.
 
-### 8. Refresh orchestration and snapshots
+### 9. Refresh orchestration and snapshots
 
 - implement database-coordinated create-or-find across Portfolio instances;
 - capture target account set at acceptance;
@@ -597,7 +615,7 @@ positions visible, and selecting an empty account yields a valid empty snapshot.
 Exit gate: concurrency, redelivery, process death, partial provider failure, and
 all-account failure tests preserve invariants and never erase successful data.
 
-### 9. Portfolio read views
+### 10. Portfolio read views
 
 - implement `NotConfigured`, `Ready`, `Degraded`, and `Unavailable` calculation;
 - expose account and consolidated views over the same snapshots;
@@ -608,7 +626,7 @@ all-account failure tests preserve invariants and never erase successful data.
 Exit gate: every accepted view is reproducible from committed snapshots and
 cannot misrepresent stale/missing coverage as current or complete.
 
-### 10. Recovery, observability, and end-to-end proof
+### 11. Recovery, observability, and end-to-end proof
 
 - implement DLQ/operator recovery path and stuck-operation reconciliation;
 - complete required audit events, structured logs, traces, metrics, health, and
