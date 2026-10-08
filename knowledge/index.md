@@ -31,3 +31,4 @@ architecture.
 - Product value, scope, and success: [Product](product/index.md)
 - Architecture, identity, isolation, and implementation conventions: [Architecture](architecture/index.md)
 - Current delivery plan, slice contracts, and verification evidence: [Vertical slices](vertical-slices/index.md)
+- Knowledge bundle maintenance and review: [Maintenance](maintenance/index.md)

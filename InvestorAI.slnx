@@ -150,4 +150,8 @@
 		<File Path="knowledge/vertical-slices/portfolio-foundation/security-audit-observability/index.md" />
 		<File Path="knowledge/vertical-slices/portfolio-foundation/security-audit-observability/security-and-errors.md" />
 	</Folder>
+	<Folder Name="/SolutionItems/knowledgebase/maintenance/">
+		<File Path="knowledge/maintenance/index.md" />
+		<File Path="knowledge/maintenance/checklist.md" />
+	</Folder>
 </Solution>
