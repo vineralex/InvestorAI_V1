@@ -38,6 +38,9 @@
 		<Project Path="tools/InvestorAI.AdminCli/InvestorAI.AdminCli.csproj" Id="fbd03fa8-8f3c-4926-8781-e7cf80f26169" />
 		<Project Path="tools/InvestorAI.DevCli/InvestorAI.DevCli.csproj" Id="fb92c6da-40b6-4e3a-86fc-6f3918c8e30f" />
 	</Folder>
+	<Folder Name="/tests/">
+		<Project Path="tests/InvestorAI.Infrastructure.Tests/InvestorAI.Infrastructure.Tests.csproj" />
+	</Folder>
 	<Folder Name="/knowledgebase/">
 		<File Path="knowledge/index.md" />
 	</Folder>

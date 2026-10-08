@@ -14,3 +14,10 @@ For every repository task:
 
 Maintain the `knowledge/` directory as the Open Knowledge Format (OKF) bundle
 defined in [knowledge/index.md](knowledge/index.md).
+
+## Repository language
+
+Use English for all content added or edited in this repository, including
+documentation, code identifiers, comments, messages, and test data. Represent
+non-English characters needed for tests with Unicode escapes. This rule does
+not apply to chat with the user.

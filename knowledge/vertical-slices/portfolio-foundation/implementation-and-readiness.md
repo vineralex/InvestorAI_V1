@@ -362,9 +362,32 @@ confirmed the four definitions retain their own assembly, role, password key,
 journal and resource prefix. No PostgreSQL verification was performed in this
 audit; historical owner database evidence above predates the rename.
 
-Confirm normal Tenant F5 execution after removal of the temporary scripts.
-Confirm Email's journal row count if it has not yet been checked.
-xUnit/test setup and the remaining milestone runbook commands are outstanding.
+On 2026-10-09, the owner confirmed normal Tenant F5 execution after removal
+of the temporary scripts and the Email journal row-count check as complete.
+
+The owner authorized xUnit setup. `tests/InvestorAI.Infrastructure.Tests` is
+included under the solution's tests folder and references the shared
+infrastructure project. Central package versions are xunit.v3 4.0.1,
+xunit.runner.visualstudio 4.0.0, and Microsoft.NET.Test.Sdk 18.10.1.
+`global.json` selects Microsoft.Testing.Platform for .NET 10 CLI test execution;
+the Visual Studio adapter supports Test Explorer. The test project is not packable.
+
+The initial 11 test cases verify migration settings validation, valid port
+boundaries, and literal password/service identity preservation in the connection
+string. Configuration is synthetic and in-memory; tests neither read the root
+`.env` nor connect to PostgreSQL. Solution build passed with the six existing
+warnings and no errors; all 11 tests passed on 2026-10-09.
+
+Run from the repository root:
+
+```powershell
+dotnet test --solution InvestorAI.slnx
+```
+
+In Visual Studio, open Test Explorer and run all tests. Service-specific test
+projects will be added when they have concrete behavior to verify. Remaining
+milestone runbook commands and runtime permissions on actual service objects
+are still outstanding; milestone 0 is not complete.
 
 The owner performs the setup in Visual Studio; the assistant guides and reviews.
 Discuss concrete changes before making them and obtain the owner's agreement;
@@ -374,8 +397,8 @@ XML indentation uses tabs
 with display width four; YAML indentation uses spaces.
 
 Role bootstrap is implemented and verified. Remaining milestone gates include
-service-owned migrator setup and runtime permission verification on actual
-service objects, xUnit/test setup, and remaining repeatable runbook commands.
+runtime permission verification on actual service objects and remaining
+repeatable runbook commands.
 
 ## Implementation discipline
 
